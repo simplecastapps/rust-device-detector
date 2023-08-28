@@ -13,13 +13,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Build Release
-      uses: actions/checkout@v3
-      run: cargo build --release
+      - name: Build Release
+        run: cargo build --release
 
-    - name: Upload Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        files: target/release/rust-device-detector
+      - name: Upload Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: target/release/rust-device-detector
