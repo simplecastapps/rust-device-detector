@@ -187,7 +187,7 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
                 return Ok(Some("x64".into()));
             }
 
-            if !arch.contains("x86") {
+            if arch.contains("x86") {
                 if let Some(bitness) = &client_hints.bitness {
                     if bitness == "64" {
                         return Ok(Some("x64".into()));
