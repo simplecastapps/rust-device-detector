@@ -1,0 +1,365 @@
+use anyhow::Result;
+
+use fancy_regex::Regex;
+
+use lazy_static::lazy_static;
+use serde::Deserialize;
+
+use version_compare::Cmp;
+
+use std::cmp::Ordering;
+
+use std::collections::HashMap;
+
+use fallible_iterator::{convert, FallibleIterator};
+
+use super::{Client, ClientType};
+use crate::client_hints::{ClientHint, ClientHintMapping};
+use crate::known_browsers::AvailableBrowsers;
+use crate::parsers::utils::LazyRegex;
+
+pub mod engines;
+
+lazy_static! {
+    static ref CLIENT_LIST: BrowserClientList = {
+        let contents = std::include_str!("../../../regexes/client/browsers.yml");
+        BrowserClientList::from_file(contents).expect("loading browsers.yml")
+    };
+    static ref CLIENT_HINT_MAPPING: ClientHintMapping = ClientHintMapping::new(vec![(
+        "Chrome".to_owned(),
+        vec!["Google Chrome".to_owned()]
+    )]);
+    static ref AVAILABLE_BROWSERS: AvailableBrowsers = AvailableBrowsers::default();
+}
+
+pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Client>> {
+    let client_from_ua: Option<Client> = CLIENT_LIST.lookup(ua)?;
+
+    let mut client_from_hints = if let Some(client_hints) = client_hints {
+        let client_hints_iter = convert(client_hints.full_version_list.iter().map(anyhow::Ok));
+        let mut possible_results: Vec<_> = client_hints_iter
+            .filter_map(|i| {
+                let brand = CLIENT_HINT_MAPPING.apply(&i.0)?;
+                let res = AVAILABLE_BROWSERS
+                    .search_by_name(brand.trim())
+                    .map(|x| (&i.0, &i.1, x));
+
+                Ok(res)
+            })
+            .collect()?;
+
+        // ensure chromium is the last result
+        possible_results.sort_by_key(|x| x.0 == "Chromium");
+
+        if let Some((brand_version, brand_result)) = possible_results.get(0).map(|x| (x.1, x.2)) {
+            let version = if let Some(ua_full_version) = &client_hints.ua_full_version {
+                ua_full_version
+            } else {
+                brand_version
+            };
+
+            let res = Client {
+                name: brand_result.name.clone(),
+                version: version.clone(),
+                r#type: ClientType::Browser,
+                engine: None,
+                engine_version: None,
+                browser: Some(brand_result.to_owned()),
+            };
+            Some(res)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    if let Some(mut client_from_hints) = client_from_hints.as_mut() {
+        if client_from_hints.version == "2021.12"
+            || client_from_hints.version == "2022"
+            || client_from_hints.version == "2022.4"
+        {
+            client_from_hints.name = "Iridium".to_owned();
+            // client_from_hints.short = "I1".to_owned();
+
+            // todo from browser
+            client_from_hints.engine = None;
+            client_from_hints.engine_version = None;
+
+            client_from_hints.version = client_from_ua
+                .as_ref()
+                .map(|x| x.version.clone())
+                .unwrap_or_default();
+            client_from_hints.engine_version = client_from_ua
+                .as_ref()
+                .map(|x| x.engine_version.clone())
+                .unwrap_or_default();
+        }
+
+        if client_from_hints.name == "Atom" || client_from_hints.name == "Huawei Browser" {
+            client_from_hints.version = client_from_ua
+                .as_ref()
+                .map(|x| x.version.clone())
+                .unwrap_or_default();
+        }
+
+        if client_from_hints.name == "Chromium" {
+            if let Some(client) = &client_from_ua {
+                if client.name != "Chromium" {
+                    client_from_hints.name = client.name.clone();
+                    client_from_hints.version = client.version.clone();
+                }
+            }
+        }
+
+        if let Some(client) = &client_from_ua {
+            if client.name == format!("{} Mobile", client_from_hints.name) {
+                client_from_hints.name = client_from_ua
+                    .as_ref()
+                    .map(|x| x.name.clone())
+                    .unwrap_or_default();
+            }
+        }
+
+        if let Some(client) = &client_from_ua {
+            if client_from_hints.name != client.name {
+                // TODO FIXME uncomment when we have written this function
+                //                if browser_family(&client_from_hints.name) == browser_family(&client.name) {
+                client_from_hints.engine = client.engine.clone();
+                client_from_hints.engine_version = client.engine_version.clone();
+                //               }
+            }
+        }
+
+        if let Some(client) = &client_from_ua {
+            if client_from_hints.name == client.name {
+                client_from_hints.engine = client.engine.clone();
+                client_from_hints.engine_version = client.engine_version.clone();
+
+                #[allow(clippy::collapsible_if)]
+                if !client.version.is_empty()
+                    && client.version.starts_with(&client_from_hints.version)
+                {
+                    if version_compare::compare(&client_from_hints.version, &client.version)
+                        .unwrap_or(Cmp::Eq)
+                        == Cmp::Lt
+                    {
+                        client_from_hints.version = client.version.clone();
+                    }
+                }
+            }
+        }
+    };
+
+    let mut res = client_from_hints.or(client_from_ua);
+
+    if let Some(mut client) = res.as_mut() {
+        if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(&client.name) {
+            client.browser = Some(browser.to_owned());
+        }
+
+        if let Some(client_hints) = client_hints {
+            if let Some(app_hint) = &client_hints.app {
+                if let Some(app_name) = super::hints::browsers::get_hint(app_hint)? {
+                    if client.name != app_name {
+                        client.name = app_name.to_owned();
+                        client.version = "".to_owned();
+
+                        if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(app_name) {
+                            lazy_static! {
+                                static ref BLINK_REGEX: Regex =
+                                    Regex::new(r"Chrome/.+ Safari/537.36")
+                                        .expect("valid blink regex");
+                            }
+
+                            if BLINK_REGEX.is_match(ua)? {
+                                client.engine = Some("Blink".to_owned());
+
+                                if let Some(engine) = &client.engine {
+                                    client.engine_version =
+                                        BrowserClientList::engine_version(ua, engine)?;
+                                }
+
+                                let mut client_browser = browser.clone();
+                                if client_browser.family.is_none() {
+                                    client_browser.family = Some("Chrome".to_owned());
+                                }
+
+                                client.browser = Some(client_browser);
+                            }
+                        } else {
+                            return Err(anyhow::anyhow!(
+                                "Browser hint {} not found in known browser list!",
+                                &app_hint
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    if let Some(client) = &mut res {
+        if let Some(engine) = &client.engine {
+            if engine == "Blink" && client.name == "Flow Browser" {
+                client.engine_version = None;
+            }
+        }
+    }
+
+    Ok(res)
+}
+
+#[derive(Debug, Deserialize)]
+struct BrowserClientEntry {
+    name: String,
+    #[serde(deserialize_with = "super::de_regex")]
+    regex: LazyRegex,
+    version: String,
+    // FIXME this should be a HashMap<Version | Default, Engine>
+    engine: Option<BrowserEngine>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BrowserEngine {
+    default: Option<String>,
+    #[serde(default)]
+    versions: HashMap<String, String>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(transparent)]
+struct BrowserClientList {
+    clients: Vec<BrowserClientEntry>,
+}
+
+impl BrowserClientList {
+    pub fn lookup(&self, ua: &str) -> Result<Option<Client>> {
+        for entry in self.clients.iter() {
+            if entry.regex.is_match(ua)? {
+                let mut name = "".to_owned();
+                let mut version = "".to_owned();
+
+                let caps = entry.regex.captures(ua)?.expect("valid_regex");
+
+                caps.expand(&entry.version, &mut version);
+                let version = if version.ends_with(&['.', ' ']) {
+                    version.trim_end_matches(&['.', ' ']).to_owned()
+                } else {
+                    version
+                };
+
+                caps.expand(&entry.name, &mut name);
+
+                // browsers are always have engine versions even if they are empty strings
+                let mut engine = None;
+                let mut engine_version = None;
+
+                if let Some(entry_engine) = &entry.engine {
+                    if let Some(e) = Self::engine(ua, entry_engine, &version)? {
+                        engine = Some(e);
+                    }
+                }
+
+                if engine.is_none() {
+                    engine = self::engines::lookup(ua)?;
+                }
+
+                if let Some(e) = &engine {
+                    if let Some(entry_version) = Self::engine_version(ua, e)? {
+                        engine_version = Some(entry_version);
+                    }
+                }
+
+                return Ok(Some(Client {
+                    name,
+                    version,
+                    r#type: ClientType::Browser,
+                    engine,
+                    engine_version,
+                    browser: None,
+                }));
+            }
+        }
+
+        Ok(None)
+    }
+
+    fn engine_version(ua: &str, engine: &str) -> Result<Option<String>> {
+        if engine.is_empty() {
+            return Ok(None);
+        }
+
+        if engine == "Gecko" {
+            lazy_static! {
+                static ref GECKO_VERSION: Regex =
+                    Regex::new(r#"(?i:[ ](?:rv[: ]([0-9\.]+)).*gecko/[0-9]{8,10})"#)
+                        .expect("valid browser regex");
+            }
+            for m in GECKO_VERSION.captures_iter(ua) {
+                if let Some(r#match) = m?.get(1) {
+                    return Ok(Some(r#match.as_str().to_owned()));
+                }
+            }
+        }
+
+        let mut token = engine;
+        if engine == "Blink" {
+            token = "Chrome";
+        }
+
+        let mut reg = "(?i:".to_owned();
+        reg.push_str(token);
+        reg.push_str(r#"\s*/?\s*((?=\d+\.\d)\d+[.\d]*|\d{1,7}(?=(?:\D|$)))"#);
+        reg.push(')');
+
+        let reg = Regex::new(&reg).expect("valid browser regex");
+
+        if let Some(r#match) = reg.captures(ua)? {
+            return Ok(Some(
+                r#match.get(1).expect("browser version").as_str().to_owned(),
+            ));
+        }
+
+        Ok(None)
+    }
+
+    fn engine(ua: &str, entry_engine: &BrowserEngine, version: &str) -> Result<Option<String>> {
+        let mut engine = None;
+        let mut engine_versions = entry_engine.versions.iter().collect::<Vec<_>>();
+
+        // php code assumes the versions will be sorted as they are in
+        // the file, but yaml doesn't guarantee that, so we sort them
+        // lexographically, which is all we can do.
+        //
+        engine_versions.sort_by(|&(a, _), &(b, _)| {
+            version_compare::compare(a, b)
+                .unwrap_or(Cmp::Eq)
+                .ord()
+                .unwrap_or(Ordering::Equal)
+        });
+
+        engine_versions
+            .into_iter()
+            .for_each(|(engine_version, eng)| {
+                if let Cmp::Eq | Cmp::Gt =
+                    version_compare::compare(version, engine_version).expect("valid version")
+                {
+                    engine = Some(eng.clone())
+                }
+            });
+
+        engine = engine.or_else(|| entry_engine.default.clone());
+
+        if engine.is_none() || engine.as_ref().unwrap() == "" {
+            engine = self::engines::lookup(ua)?;
+        }
+
+        Ok(engine)
+    }
+
+    pub fn from_file(contents: &str) -> Result<Self> {
+        let res = serde_yaml::from_str(contents)?;
+        Ok(res)
+    }
+}
