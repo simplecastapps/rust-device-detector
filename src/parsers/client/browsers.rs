@@ -123,11 +123,10 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
 
         if let Some(client) = &client_from_ua {
             if client_from_hints.name != client.name {
-                // TODO FIXME uncomment when we have written this function
-                //                if browser_family(&client_from_hints.name) == browser_family(&client.name) {
-                client_from_hints.engine = client.engine.clone();
-                client_from_hints.engine_version = client.engine_version.clone();
-                //               }
+                if client_from_hints.browser.as_ref().and_then(|browser| browser.family.as_ref()).is_some() && client_from_hints.browser.as_ref().map(|x| &x.family) == client.browser.as_ref().map(|x| &x.family) {
+                    client_from_hints.engine = client.engine.clone();
+                    client_from_hints.engine_version = client.engine_version.clone();
+                }
             }
         }
 
@@ -151,12 +150,10 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         }
     };
 
+
     let mut res = client_from_hints.or(client_from_ua);
 
     if let Some(mut client) = res.as_mut() {
-        if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(&client.name) {
-            client.browser = Some(browser.to_owned());
-        }
 
         if let Some(client_hints) = client_hints {
             if let Some(app_hint) = &client_hints.app {
@@ -216,7 +213,6 @@ struct BrowserClientEntry {
     #[serde(deserialize_with = "super::de_regex")]
     regex: LazyRegex,
     version: String,
-    // FIXME this should be a HashMap<Version | Default, Engine>
     engine: Option<BrowserEngine>,
 }
 
@@ -271,13 +267,20 @@ impl BrowserClientList {
                     }
                 }
 
+                let browser = if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(&name) {
+                    Some(browser.to_owned())
+                }
+                else {
+                    None
+                };
+
                 return Ok(Some(Client {
                     name,
                     version,
                     r#type: ClientType::Browser,
                     engine,
                     engine_version,
-                    browser: None,
+                    browser,
                 }));
             }
         }
