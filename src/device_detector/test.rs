@@ -210,18 +210,6 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
             _wtf @ super::Detection::Known(super::KnownDevice { client, device, os }) => {
                 known_devices += 1;
 
-                // println!("user_agent: {}", case.user_agent);
-                //pub client: Option<Client>,
-                //#[serde(deserialize_with = "decode_array_or_map")]
-                //pub os: OS,
-                //pub device: Device,
-                //pub os_family: String,
-                //pub browser_family: String,
-
-                // TODO FIXME I want nones, not some with empty strings
-                // assert!(device.brand != Some("".to_owned()));
-                // assert!(device.model!= Some("".to_owned()));
-                //
                 let us: Option<&str> = os.as_ref().and_then(|x| x.family.as_deref());
                 let them: &str = &case.expected.get_device().os_family;
 
