@@ -51,6 +51,7 @@ impl Detection {
                     "smart_speaker": known.is_smart_speaker(),
                     "pim": known.is_pim(),
                     "peripheral": known.is_peripheral(),
+                    "phablet": known.is_phablet(),
                     "robot": false,
 
                 });
@@ -275,6 +276,18 @@ impl KnownDevice {
             device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Tablet)
+            .unwrap_or(false)
+            ).unwrap_or(false)
+    }
+
+    pub fn is_phablet(&self) -> bool {
+        self.device
+            .as_ref()
+            .map(|device|
+            device
+            .device_type
+            .as_ref()
+            .map(|x| *x == DeviceType::Phablet)
             .unwrap_or(false)
             ).unwrap_or(false)
     }
