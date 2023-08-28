@@ -106,6 +106,7 @@ impl DeviceType {
 
 #[derive(Debug, Default, Serialize)]
 pub struct Device {
+    #[serde(rename = "type")]
     pub device_type: Option<DeviceType>,
     pub brand: Option<String>,
     pub model: Option<String>,
