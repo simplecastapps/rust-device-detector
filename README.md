@@ -26,11 +26,11 @@ your patches and tests upstream, then request updates here to bring these projec
 > rust-device-detector --help
 ```
 
-A single user agent
+A single user agent. Bots are indicated by a top level "bot" key. Otherwise, it is at least a valid user agent, though all three fields (device, client, os) may be null.
 
 ```shell
 > rust-device-detector 'Googlebot'
-{"category":"Search bot","name":"Googlebot","producer":{"name":"Google Inc.","url":"http://www.google.com"},"url":"http://www.google.com/bot.html"}
+{"bot":{"category":"Search bot","name":"Googlebot","producer":{"name":"Google Inc.","url":"http://www.google.com"},"url":"http://www.google.com/bot.html"}}
 
 > rust-device-detector 'Spotify/8.6.72 iOS/13.5.1 (iPhone9,2)'
 {"client":{"engine":null,"engine_version":null,"name":"Spotify","type":"mobile app","version":"8.6.72"},"device":{"brand":"Apple","device_type":"phablet","model":"iPhone 7 Plus"},"is":{"browser":false,"camera":false,"car_browser":false,"console":false,"desktop":false,"feature_phone":false,"feed_reader":false,"library":false,"media_player":false,"mobile":true,"mobile_app":true,"peripheral":false,"pim":false,"portable_media_player":false,"robot":false,"smart_display":false,"smart_phone":false,"smart_speaker":false,"tablet":false,"television":false,"touch_enabled":false},"os":{"family":"iOS","name":"iOS","platform":null,"version":"13.5.1"}}
