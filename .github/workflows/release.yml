@@ -1,0 +1,25 @@
+name: Rust
+
+on:
+  push:
+    tags: [ "v*" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Upload Release
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Build Release
+      uses: actions/checkout@v3
+      run: cargo build --release
+
+    - name: Upload Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: target/release/rust-device-detector
