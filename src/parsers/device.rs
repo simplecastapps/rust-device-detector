@@ -171,7 +171,7 @@ pub fn lookup(
     client: Option<&Client>,
     client_hints: Option<&ClientHint>,
     os_info: Option<&OS>,
-) -> Result<Device> {
+) -> Result<Option<Device>> {
     // TODO make this into a function
     #[allow(clippy::never_loop)]
     let mut device = loop {
@@ -383,13 +383,16 @@ pub fn lookup(
         device.device_type = Some(DeviceType::Desktop);
     }
 
-    if device.device_type.is_some() || !is_desktop(os_info, client) {
-        return Ok(device);
+    if device.device_type.is_none() && is_desktop(os_info, client) {
+        device.device_type = Some(DeviceType::Desktop);
     }
 
-    device.device_type = Some(DeviceType::Desktop);
-
-    Ok(device)
+    if device.device_type.is_none() && device.brand.is_none() && device.model.is_none() {
+        return Ok(None);
+    }
+    else {
+        Ok(Some(device))
+    }
 }
 
 fn is_desktop(os: Option<&OS>, client: Option<&Client>) -> bool {

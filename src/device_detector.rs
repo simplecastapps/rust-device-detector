@@ -20,7 +20,7 @@ pub enum Detection {
 #[derive(Debug, Serialize)]
 pub struct KnownDevice {
     pub client: Option<client::Client>,
-    pub device: device::Device,
+    pub device: Option<device::Device>,
     pub os: Option<oss::OS>,
 }
 
@@ -66,11 +66,12 @@ impl Detection {
 
 impl KnownDevice {
     pub fn is_mobile(&self) -> bool {
-        if self.device.mobile_client_hint {
-            return true;
-        }
+        if let Some(device) = &self.device {
+            if device.mobile_client_hint {
+                return true;
+            }
 
-        if let Some(device_type) = &self.device.device_type {
+        if let Some(device_type) = &device.device_type {
             if [
                 DeviceType::FeaturePhone,
                 DeviceType::SmartPhone,
@@ -94,6 +95,7 @@ impl KnownDevice {
                 return false;
             }
         }
+        }
 
         if let Some(client) = &self.client {
             if device::uses_mobile_browser(client) {
@@ -105,7 +107,7 @@ impl KnownDevice {
     }
 
     pub fn is_touch_enabled(&self) -> bool {
-        self.device.touch_enabled
+        self.device.as_ref().map(|device|device.touch_enabled).unwrap_or(false)
     }
 
     pub fn is_bot(&self) -> bool {
@@ -157,103 +159,142 @@ impl KnownDevice {
         // the php library duplicates logic but as far as I can
         // tell it should be equivalent to this.
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Desktop)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_console(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Console)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_car_browser(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::CarBrowser)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
     pub fn is_camera(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Camera)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
     pub fn is_portable_media_player(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::PortableMediaPlayer)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
     pub fn is_notebook(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Notebook)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_television(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Television)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_smart_display(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::SmartDisplay)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_feature_phone(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::FeaturePhone)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_smart_phone(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::SmartPhone)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_tablet(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Tablet)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_smart_speaker(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::SmartSpeaker)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 
     pub fn is_peripheral(&self) -> bool {
         self.device
-            .device_type
+            .as_ref()
+            .map(|device|
+            device.device_type
             .as_ref()
             .map(|x| *x == DeviceType::Peripheral)
             .unwrap_or(false)
+            ).unwrap_or(false)
     }
 }
 

@@ -282,7 +282,7 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
                     &case.expected.get_device().os,
                 );
 
-                let us: Option<&str> = device.device_type.as_ref().map(|x| x.as_str());
+                let us: Option<&str> = device.as_ref().and_then(|device| device.device_type.as_ref()).map(|device_type| device_type.as_str());
                 let them: Option<&str> = Some(&case.expected.get_device().device.r#type);
 
                 assert!(
@@ -295,7 +295,7 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
                     &case.expected.get_device().device,
                 );
 
-                let us = device.brand.as_ref();
+                let us = device.as_ref().and_then(|device| device.brand.as_ref());
                 let them = case.expected.get_device().device.brand.as_ref();
 
                 let brand_equality =
@@ -311,11 +311,11 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
                     &case.expected.get_device().device
                 );
 
-                let us = &device.model;
-                let them = &case.expected.get_device().device.model;
+                let us: Option<&str> = device.as_ref().and_then(|device| device.model.as_deref());
+                let them: Option<&str> = case.expected.get_device().device.model.as_deref();
 
                 let model_equality =
-                    us == them || us.is_none() && them.is_some() && them.as_ref().unwrap() == "";
+                    us == them || us.is_none() && them.is_some() && them.as_ref().unwrap() == &"";
                 assert!(
                     model_equality,
                     "device_model filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
