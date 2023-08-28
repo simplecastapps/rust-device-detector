@@ -59,7 +59,11 @@ impl Detection {
                 val["is"] = is;
                 val
             }
-            Detection::Bot(bot) => serde_json::to_value(bot).unwrap(),
+            Detection::Bot(bot) => {
+                serde_json::json!({
+                    "bot": serde_json::to_value(bot).unwrap()
+                })
+            },
         }
     }
 }
