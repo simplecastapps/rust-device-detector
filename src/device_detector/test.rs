@@ -225,6 +225,20 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
                     &them,
                 );
 
+                let us: Option<&str> = os.as_ref().and_then(|x| x.platform.as_deref());
+                let them: Option<&str> = case.expected.get_device().os.platform.as_deref();
+
+                let platform_equality = us == them || us.is_none() && them == Some("");
+                assert!(
+                    platform_equality,
+                    "os platform filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    path.display(),
+                    file_index,
+                    entry,
+                    &us,
+                    &them,
+                );
+
                 let us: Option<&str> = client
                     .as_ref()
                     .and_then(|x| x.browser.as_ref())
