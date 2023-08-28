@@ -12,10 +12,14 @@ your patches and tests upstream, then request updates here to bring these projec
 
 
 # Build
+```shell
 > cargo build --release
+```
 
 # Test
+```shell
 > cargo test
+```
 
 # Usage
 ```shell
@@ -43,17 +47,22 @@ Call on many user agents
 
 Or you may call as a webserver, in which will allow for concurrency.
 
+```shell
 > rust-device-detector -s -p 8080&
 > curl --data-binary 'Spotify/8.6.72 iOS/13.5.1 (iPhone9,2)' 'localhost:8080'
 # get a result.
+```
 
 And of course it is perfectly usable as a library by adding to your Cargo.toml
 ```
-rust-device-detector = { git = "https://github.com/simplecastapps/rust-device-detector.git", branch = "master" }
+rust-device-detector = { git = "https://github.com/simplecastapps/rust-device-detector.git", branch = "main" }
 ```
 
 This will likely be added to crates.io once it has been proven in production and the API has fully settled.
 
 # RoadMap
 
-Need ability to submit headers via commandline.
+These changes are required before this could be considered for a 1.0 or be submitted to crates.io
+
+* Need ability to submit headers via commandline.
+* Ability to submit raw headers for commandline and http server mode, presumably with a user agent header within them.
