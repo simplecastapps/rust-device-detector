@@ -44,10 +44,12 @@ pub(crate) fn expand(template: &str, dst: &mut String, captures: &Captures<'_>) 
     //
     // would just use `caps.expand(&template, &mut dst);`
     use fancy_regex::Expander;
-    let r = Regex::new(r"\$([1-9])").unwrap();
+    lazy_static::lazy_static! {
+        static ref RE: Regex = Regex::new(r"\$([1-9])").unwrap();
+    }
 
     //dbg!(template);
-    let template = r.replace_all(template, |caps: &Captures<'_>| format!("${{{}}}", &caps[1]));
+    let template = RE.replace_all(template, |caps: &Captures<'_>| format!("${{{}}}", &caps[1]));
 
     //dbg!(&dst, &*template, &captures);
     Expander::default().append_expansion(dst, &template, captures);
