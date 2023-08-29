@@ -17,6 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Build (all features enabled)
+      run: cargo build --features full
+
     - name: Build
       run: cargo build
 

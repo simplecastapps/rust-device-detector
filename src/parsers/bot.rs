@@ -19,7 +19,7 @@ pub fn lookup_bot(ua: &str) -> Result<Option<Bot>> {
     BOT_LIST.lookup(ua)
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Bot {
     pub name: String,
     pub category: Option<String>,

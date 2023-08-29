@@ -284,7 +284,10 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
                     &case.expected.get_device().os,
                 );
 
-                let us: Option<&str> = device.as_ref().and_then(|device| device.device_type.as_ref()).map(|device_type| device_type.as_str());
+                let us: Option<&str> = device
+                    .as_ref()
+                    .and_then(|device| device.device_type.as_ref())
+                    .map(|device_type| device_type.as_str());
                 let them: Option<&str> = Some(&case.expected.get_device().device.r#type);
 
                 assert!(
@@ -420,7 +423,12 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
             }
         }
     }
-    println!("fixture {}, bots {} known_devices {}", path.display(), bots, known_devices);
+    println!(
+        "fixture {}, bots {} known_devices {}",
+        path.display(),
+        bots,
+        known_devices
+    );
 }
 #[tokio::test(flavor = "multi_thread")]
 async fn test_fixtures() {
@@ -429,10 +437,10 @@ async fn test_fixtures() {
         .map(|x| x.expect("glob"))
         .enumerate()
         .skip(0)
-        .map(|(i,path)|
-            tokio::spawn(test_fixture(i, path))
-        )
+        .map(|(i, path)| tokio::spawn(test_fixture(i, path)))
         .collect::<Vec<_>>();
 
-    for i in res { i.await.unwrap() };
+    for i in res {
+        i.await.unwrap()
+    }
 }

@@ -122,8 +122,16 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         }
 
         if let Some(client) = &client_from_ua {
+            #[allow(clippy::collapsible_if)]
             if client_from_hints.name != client.name {
-                if client_from_hints.browser.as_ref().and_then(|browser| browser.family.as_ref()).is_some() && client_from_hints.browser.as_ref().map(|x| &x.family) == client.browser.as_ref().map(|x| &x.family) {
+                if client_from_hints
+                    .browser
+                    .as_ref()
+                    .and_then(|browser| browser.family.as_ref())
+                    .is_some()
+                    && client_from_hints.browser.as_ref().map(|x| &x.family)
+                        == client.browser.as_ref().map(|x| &x.family)
+                {
                     client_from_hints.engine = client.engine.clone();
                     client_from_hints.engine_version = client.engine_version.clone();
                 }
@@ -150,11 +158,9 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         }
     };
 
-
     let mut res = client_from_hints.or(client_from_ua);
 
     if let Some(mut client) = res.as_mut() {
-
         if let Some(client_hints) = client_hints {
             if let Some(app_hint) = &client_hints.app {
                 if let Some(app_name) = super::hints::browsers::get_hint(app_hint)? {
@@ -267,12 +273,7 @@ impl BrowserClientList {
                     }
                 }
 
-                let browser = if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(&name) {
-                    Some(browser.to_owned())
-                }
-                else {
-                    None
-                };
+                let browser = AVAILABLE_BROWSERS.search_by_name(&name).map(|browser| browser.to_owned());
 
                 return Ok(Some(Client {
                     name,

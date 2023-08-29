@@ -37,7 +37,7 @@ pub mod pim;
 
 use crate::client_hints::ClientHint;
 
-#[derive(Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum ClientType {
     #[serde(rename = "browser")]
     Browser,
@@ -66,7 +66,7 @@ impl ClientType {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Client {
     pub name: String,
     pub version: String,

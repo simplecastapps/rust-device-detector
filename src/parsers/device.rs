@@ -104,7 +104,7 @@ impl DeviceType {
     }
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct Device {
     #[serde(rename = "type")]
     pub device_type: Option<DeviceType>,
@@ -389,9 +389,8 @@ pub fn lookup(
     }
 
     if device.device_type.is_none() && device.brand.is_none() && device.model.is_none() {
-        return Ok(None);
-    }
-    else {
+        Ok(None)
+    } else {
         Ok(Some(device))
     }
 }

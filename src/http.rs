@@ -6,14 +6,15 @@ use hyper::{Body, Method, Request, Response, Server};
 use std::convert::Infallible;
 use std::net::SocketAddr;
 
-use crate::device_detector;
-async fn serve_request(req: Request<Body>) -> Result<Response<Body>> {
+use crate::device_detector::DeviceDetector;
+
+async fn serve_request(req: Request<Body>, device_detector: DeviceDetector) -> Result<Response<Body>> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/detect") => {
             // TODO prevent pulling entire body into memory in case of abuse
             let body = hyper::body::to_bytes(req.into_body()).await?;
             let body = String::from_utf8(body.to_vec())?;
-            let detection = device_detector::parse(&body, None).unwrap();
+            let detection = device_detector.parse(&body, None).await.unwrap();
             let response = serde_json::to_string(&detection.to_value())?;
 
             Ok(Response::new(Body::from(response)))
@@ -32,19 +33,23 @@ async fn serve_request(req: Request<Body>) -> Result<Response<Body>> {
     .map_err(|x| x.into())
 }
 
-pub async fn server(port: u16) {
-    // TODO make ip configurable
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
 
-    eprintln!("listing on {}", addr);
+pub async fn server(listen_address: SocketAddr, device_detector: DeviceDetector) {
+    // TODO make ip configurable
+    eprintln!("Listening on {}", listen_address);
 
     let make_svc = make_service_fn(|_conn| {
-        let service = service_fn(move |req| serve_request(req));
+        let device_detector = device_detector.clone();
+
+        let service = service_fn(move |req| {
+            let device_detector = device_detector.clone();
+            serve_request(req, device_detector)
+        });
 
         async move { Ok::<_, Infallible>(service) }
     });
 
-    let server = Server::bind(&addr).serve(make_svc);
+    let server = Server::bind(&listen_address).serve(make_svc);
 
     // Run this server for... forever!
     if let Err(e) = server.await {

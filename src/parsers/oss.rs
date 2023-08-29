@@ -29,7 +29,7 @@ lazy_static! {
     static ref AVAILABLE_OSSES: AvailableOSs = AvailableOSs::default();
 }
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize)]
 pub struct OS {
     pub name: String,
     pub version: Option<String>,
