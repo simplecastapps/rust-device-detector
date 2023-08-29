@@ -322,6 +322,7 @@ impl KnownDevice {
 // use std::alloc::System;
 // use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
+#[cfg(feature = "cache")]
 type DetectionCache = Cache<(String,Option<Vec<(String,String)>>),Detection>;
 
 #[derive(Clone)]
@@ -329,7 +330,7 @@ pub struct DeviceDetector {
     #[cfg(feature = "cache")]
     caching: bool,
     #[cfg(feature = "cache")]
-    cache: DetectionCache,
+    cache: DetectionCache
 }
 
 impl DeviceDetector {

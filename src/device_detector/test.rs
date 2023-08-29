@@ -172,7 +172,7 @@ pub struct TestCases {
 
 use std::path::PathBuf;
 
-async fn test_fixture(file_index: usize, path: PathBuf) {
+async fn test_fixture(detector: super::DeviceDetector, file_index: usize, path: PathBuf) {
     // println!("fixture path: {:?}", path);
     let file = File::open(path.clone()).expect("valid file");
     let reader = BufReader::new(file);
@@ -189,9 +189,9 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
             .clone()
             .map(|x| x.into_iter().collect::<Vec<(String, String)>>());
 
-        let res = super::parse(case.user_agent.as_str(), headers);
+        let res = detector.parse(case.user_agent.as_str(), headers);
         // println!("res {:?}", &res);
-        match &res.unwrap() {
+        match &res.await.unwrap() {
             super::Detection::Bot(bot) => {
                 bots += 1;
                 assert_eq!(bot.name, case.expected.get_bot().name);
@@ -432,12 +432,17 @@ async fn test_fixture(file_index: usize, path: PathBuf) {
 }
 #[tokio::test(flavor = "multi_thread")]
 async fn test_fixtures() {
+    let detector = super::DeviceDetector::new();
+
     let res: Vec<_> = glob::glob("tests/fixtures/*.yml")
         .expect("text fixtures")
         .map(|x| x.expect("glob"))
         .enumerate()
         .skip(0)
-        .map(|(i, path)| tokio::spawn(test_fixture(i, path)))
+        .map(|(i, path)| {
+            let detector = detector.clone();
+            tokio::spawn(test_fixture(detector, i, path))
+        })
         .collect::<Vec<_>>();
 
     for i in res {
