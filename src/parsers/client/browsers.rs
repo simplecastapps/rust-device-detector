@@ -273,7 +273,9 @@ impl BrowserClientList {
                     }
                 }
 
-                let browser = AVAILABLE_BROWSERS.search_by_name(&name).map(|browser| browser.to_owned());
+                let browser = AVAILABLE_BROWSERS
+                    .search_by_name(&name)
+                    .map(|browser| browser.to_owned());
 
                 return Ok(Some(Client {
                     name,

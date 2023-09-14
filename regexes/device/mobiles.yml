@@ -885,9 +885,9 @@ TiVo:
 
 # Apple
 Apple:
-  regex: '(?:iTunes-)?Apple[ _]?TV|Apple/|(?:Apple-|iTunes-)?(?<!like )(?:iPad|iPhone)(?!\: Build/)|iPh(?:[0-9]|1[0-4]),[0-9]|CFNetwork|HomePod|AirPlay|Watch ?OS|Watch1,[12]|MDCR_Mac|ICRU_iP(?:ad|hone)|Mac OS X[,;]|macOS,'
+  regex: '(?:iTunes-)?Apple[ _]?TV|Apple/|(?:Apple-|iTunes-)?(?<!like )(?:iPad|iPhone)(?!\: Build/)|iPh(?:[0-9]|1[0-4]),[0-9]|CFNetwork|HomePod|AirPlay|AirPodcasts/|Watch ?OS|Watch1,[12]|MDCR_Mac|ICRU_iP(?:ad|hone)|Mac OS X[,;]|macOS,|for Apple Watch'
   models:
-    - regex: 'HomePod'
+    - regex: '(?:HomePod|AirPodcasts/)'
       device: 'smart speaker'
       model: 'HomePod'
     - regex: 'AirPlay'
@@ -937,7 +937,7 @@ Apple:
     - regex: 'Watch6,[79]'
       device: 'wearable'
       model: 'Watch Series 7 45mm'
-    - regex: 'Watch'
+    - regex: 'Watch|for Apple Watch'
       device: 'wearable'
       model: 'Watch'
 

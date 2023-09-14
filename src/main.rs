@@ -36,9 +36,13 @@ struct Args {
     server: bool,
 
     /// Address to listen on, when in http server mode.
-    #[arg(short = 'l', long = "listen", value_name = "ADDRESS", default_value = "127.0.0.1")]
+    #[arg(
+        short = 'l',
+        long = "listen",
+        value_name = "ADDRESS",
+        default_value = "127.0.0.1"
+    )]
     ip: String,
-
 
     /// Port to run on, when in http server mode.
     #[arg(short = 'p', long = "port", default_value = "8080")]
@@ -58,6 +62,15 @@ struct Args {
     /// Always remember escape shell arguments!
     #[arg(required_unless_present_any(["interactive", "server"]))]
     useragent: Option<String>,
+
+    /// Generate a basic test cases instead of the normal output.
+    ///
+    /// This is purely to make adding new test cases easier, and the output
+    /// should not be relied upon for anything else. Manual tweaking may be
+    /// required, and you should ensure that all tests should work with the
+    /// php version of the detector.
+    #[arg(long = "gen-test-case", default_value = "false")]
+    gen_test_case: bool,
 }
 
 // use std::alloc::System;
@@ -80,8 +93,7 @@ async fn main() -> Result<(), ExitCode> {
     let detector = if let Some(entries) = args.cache {
         eprintln!("Cache enabled ({} entries)", entries);
         DeviceDetector::new_with_cache(entries)
-    }
-    else {
+    } else {
         DeviceDetector::new()
     };
 
@@ -90,8 +102,16 @@ async fn main() -> Result<(), ExitCode> {
         let mut ua = String::with_capacity(50); // may also use with_capacity if you can guess
         while std::io::stdin().read_line(&mut ua).unwrap() > 0 {
             let headers = None;
-            let detection = detector.parse(&ua, headers).await.unwrap_or_else(|_| panic!("parse failed for {}", &ua));
-            println!("{}", detection.to_value());
+            let detection = detector
+                .parse(&ua.trim_end(), headers)
+                .await
+                .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
+
+            if args.gen_test_case {
+                println!("{}", detection.to_test_case(&ua));
+            } else {
+                println!("{}", detection.to_value());
+            }
 
             ua.clear(); // clear to reuse the buffer
         }
@@ -116,12 +136,14 @@ async fn main() -> Result<(), ExitCode> {
                 let headers = None;
                 let detection = detector.parse(&ua, headers).await.unwrap();
 
-                // TODO json
-                println!("{}", detection.to_value());
+                if args.gen_test_case {
+                    println!("{}", detection.to_test_case(&ua));
+                } else {
+                    println!("{}", detection.to_value());
+                }
             }
         }
     }
-
 
     // let ch = reg.change();
     // println!("allocations over entire run: {:#?} remaining {}", ch, ch.bytes_allocated - ch.bytes_deallocated);

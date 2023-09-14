@@ -8,7 +8,10 @@ use std::net::SocketAddr;
 
 use crate::device_detector::DeviceDetector;
 
-async fn serve_request(req: Request<Body>, device_detector: DeviceDetector) -> Result<Response<Body>> {
+async fn serve_request(
+    req: Request<Body>,
+    device_detector: DeviceDetector,
+) -> Result<Response<Body>> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/detect") => {
             // TODO prevent pulling entire body into memory in case of abuse
@@ -32,7 +35,6 @@ async fn serve_request(req: Request<Body>, device_detector: DeviceDetector) -> R
     }
     .map_err(|x| x.into())
 }
-
 
 pub async fn server(listen_address: SocketAddr, device_detector: DeviceDetector) {
     // TODO make ip configurable

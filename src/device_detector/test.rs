@@ -183,6 +183,8 @@ async fn test_fixture(detector: super::DeviceDetector, file_index: usize, path: 
     for (entry, case) in cases.cases.into_iter().enumerate().skip(0) {
         let entry = entry + 1;
 
+        println!("user agent: '{}'", case.user_agent);
+
         let headers = case
             .headers
             // .take() vs .clone for faster tests
@@ -210,139 +212,153 @@ async fn test_fixture(detector: super::DeviceDetector, file_index: usize, path: 
             _wtf @ super::Detection::Known(super::KnownDevice { client, device, os }) => {
                 known_devices += 1;
 
-                let us: Option<&str> = os.as_ref().and_then(|x| x.family.as_deref());
-                let them: &str = &case.expected.get_device().os_family;
+                let code: Option<&str> = os.as_ref().and_then(|x| x.family.as_deref());
+                let test: &str = &case.expected.get_device().os_family;
 
-                let family_equality = us == Some(them) || us.is_none() && them == "Unknown";
+                let family_equality = code == Some(test) || code.is_none() && test == "Unknown";
 
                 assert!(
                     family_equality,
-                    "os family filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    "os family filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.display(),
                     file_index,
                     entry,
-                    &us,
-                    &them,
+                    &code,
+                    &test,
+                    case.user_agent
                 );
 
-                let us: Option<&str> = os.as_ref().and_then(|x| x.platform.as_deref());
-                let them: Option<&str> = case.expected.get_device().os.platform.as_deref();
+                let code: Option<&str> = os.as_ref().and_then(|x| x.platform.as_deref());
+                let test: Option<&str> = case.expected.get_device().os.platform.as_deref();
 
-                let platform_equality = us == them || us.is_none() && them == Some("");
+                let platform_equality = code == test || code.is_none() && test == Some("");
                 assert!(
                     platform_equality,
-                    "os platform filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    "os platform filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.display(),
                     file_index,
                     entry,
-                    &us,
-                    &them,
+                    &code,
+                    &test,
+                    case.user_agent
                 );
 
-                let us: Option<&str> = client
+                let code: Option<&str> = client
                     .as_ref()
                     .and_then(|x| x.browser.as_ref())
                     .and_then(|x| x.family.as_deref());
 
-                let them = &case.expected.get_device().browser_family;
+                let test = &case.expected.get_device().browser_family;
 
-                let browser_family_equality = us == Some(them) || us.is_none() && them == "Unknown";
+                let browser_family_equality =
+                    code == Some(test) || code.is_none() && test == "Unknown";
 
                 assert!(
                     browser_family_equality,
-                    "browser family filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    "browser family filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
-                    &us,
-                    &them,
+                    &code,
+                    &test,
+                    case.user_agent
                 );
 
-                let us: Option<&str> = os.as_ref().and_then(|x| x.version.as_deref());
-                let them: Option<&str> = case.expected.get_device().os.version.as_deref();
+                let code: Option<&str> = os.as_ref().and_then(|x| x.version.as_deref());
+                let test: Option<&str> = case.expected.get_device().os.version.as_deref();
 
                 assert!(
-                    us == them || us.is_none() && them.unwrap() == "",
-                    "os version filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    code == test || code.is_none() && test.unwrap() == "",
+                    "os version filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
                     &os,
                     &case.expected.get_device().os,
+                    case.user_agent
                 );
 
-                let us: Option<&str> = os.as_ref().map(|x| x.name.as_str());
-                let them: Option<&str> = case.expected.get_device().os.name.as_deref();
+                let code: Option<&str> = os.as_ref().map(|x| x.name.as_str());
+                let test: Option<&str> = case.expected.get_device().os.name.as_deref();
 
                 assert!(
-                    us == them,
-                    "os name filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    code == test,
+                    "os name filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
                     &os,
                     &case.expected.get_device().os,
+                    case.user_agent
                 );
 
-                let us: Option<&str> = device
+                let code: Option<&str> = device
                     .as_ref()
                     .and_then(|device| device.device_type.as_ref())
                     .map(|device_type| device_type.as_str());
-                let them: Option<&str> = Some(&case.expected.get_device().device.r#type);
+                let test: Option<&str> = Some(&case.expected.get_device().device.r#type);
+
+                dbg!(&code);
+                dbg!(&test);
 
                 assert!(
-                    us == them || (us.is_none() && them.is_some() && them.unwrap() == ""),
-                    "device_type filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    code == test || (code.is_none() && test.is_some() && test.unwrap() == ""),
+                    "device_type filename: {} file: {} entry: {}\n code: {:?}\n test: {:?} ua: {}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
                     &device,
                     &case.expected.get_device().device,
+                    case.user_agent
                 );
 
-                let us = device.as_ref().and_then(|device| device.brand.as_ref());
-                let them = case.expected.get_device().device.brand.as_ref();
+                let code = device.as_ref().and_then(|device| device.brand.as_ref());
+                let test = case.expected.get_device().device.brand.as_ref();
 
                 let brand_equality =
-                    us == them || (us.is_none() && them.is_some() && them.unwrap() == "");
+                    code == test || (code.is_none() && test.is_some() && test.unwrap() == "");
 
                 assert!(
                     brand_equality,
-                    "device_brand filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    "device_brand filename: {} file: {} entry: {} ua: {}\n code: {:?}\n test: {:?}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
+                    case.user_agent,
                     &device,
                     &case.expected.get_device().device
                 );
 
-                let us: Option<&str> = device.as_ref().and_then(|device| device.model.as_deref());
-                let them: Option<&str> = case.expected.get_device().device.model.as_deref();
+                let code: Option<&str> = device.as_ref().and_then(|device| device.model.as_deref());
+                let test: Option<&str> = case.expected.get_device().device.model.as_deref();
 
-                let model_equality =
-                    us == them || us.is_none() && them.is_some() && them.as_ref().unwrap() == &"";
+                let model_equality = code == test
+                    || code.is_none() && test.is_some() && test.as_ref().unwrap() == &"";
                 assert!(
                     model_equality,
-                    "device_model filename: {} file: {} entry: {}\n us: {:?}\n them: {:?}",
+                    "device_model filename: {} file: {} entry: {} ua: {}\n code: {:?}\n test: {:?}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
+                    case.user_agent,
                     &device,
-                    &case.expected.get_device().device
+                    &case.expected.get_device().device,
                 );
 
                 assert_eq!(
                     client.as_ref().map(|x| &x.name),
                     case.expected.get_device().client.as_ref().map(|x| &x.name),
-                    "client_name filename: {} file: {} entry: {} ua: {}",
+                    "client_name filename: {} file: {} entry: {} ua: {}\n code: {:?}\n test: {:?}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
-                    case.user_agent
+                    case.user_agent,
+                    &client,
+                    &case.expected.get_device().client,
                 );
 
-                let us: Option<&str> = client.as_ref().map(|x| x.r#type.as_str());
-                let them: Option<&str> = case
+                let code: Option<&str> = client.as_ref().map(|x| x.r#type.as_str());
+                let test: Option<&str> = case
                     .expected
                     .get_device()
                     .client
@@ -350,15 +366,15 @@ async fn test_fixture(detector: super::DeviceDetector, file_index: usize, path: 
                     .map(|x| x.r#type.as_ref());
 
                 assert_eq!(
-                    us,
-                    them,
-                    "client_type filename: {} file: {} entry: {} ua: {} us: {:?} them: {:?}",
+                    code,
+                    test,
+                    "client_type filename: {} file: {} entry: {} ua: {} code: {:?} test: {:?}",
                     path.to_str().unwrap(),
                     file_index,
                     entry,
                     case.user_agent,
-                    us,
-                    them
+                    code,
+                    test
                 );
 
                 assert_eq!(
@@ -434,18 +450,23 @@ async fn test_fixture(detector: super::DeviceDetector, file_index: usize, path: 
 async fn test_fixtures() {
     let detector = super::DeviceDetector::new();
 
-    let res: Vec<_> = glob::glob("tests/fixtures/*.yml")
+    let files = glob::glob("tests/fixtures/*.yml")
         .expect("text fixtures")
         .map(|x| x.expect("glob"))
         .enumerate()
-        .skip(0)
-        .map(|(i, path)| {
-            let detector = detector.clone();
-            tokio::spawn(test_fixture(detector, i, path))
-        })
-        .collect::<Vec<_>>();
+        .skip(0);
 
-    for i in res {
-        i.await.unwrap()
+    let mut threads = Vec::new();
+
+    for (i, path) in files {
+        let detector = detector.clone();
+
+        // test_fixture(detector, i, path).await;
+        let res = tokio::spawn(test_fixture(detector, i, path));
+        threads.push(res);
+    }
+
+    for i in threads {
+        i.await.expect("thread completion")
     }
 }

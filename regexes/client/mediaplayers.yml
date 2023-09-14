@@ -77,6 +77,14 @@
   name: 'Winamp'
   version: '$1'
 
+  # total real world examples: 1253
+  # pattern registered as ua Windows Media Player via Microsoft-Windows-XP/2002, UPnP/1.1, J. River Internet Reader/2.0 (compatible; Windows-Media-Player/10)
+  # pattern registered as ua Windows Media Player via J. River Internet Reader/2.0 (compatible; Windows-Media-Player/10)
+  # pattern registered as ua Windows Media Player via Microsoft-Windows-XP/2002, UPnP/1.1, J. River Internet Reader/2.0 (compatible; Windows-Media-Player/10)
+- regex: 'J\. River Internet Reader/(\d+\.[.\d]+)'
+  name: 'JRiver Media Center'
+  version: '$1'
+
 - regex: '(?:Windows-Media-Player|NSPlayer)(?:/(\d+[\.\d]+))?'
   name: 'Windows Media Player'
   version: '$1'
@@ -124,3 +132,60 @@
 - regex: 'Downcast/(\d+\.[\d\.]+)?'
   name: 'Downcast'
   version: '$1'
+
+  # total real world examples: 14131
+  # pattern missing via Juice/2.2 (Darwin) +http://juicereceiver.sf.net/
+  # pattern missing via Juice/1 CFNetwork/1333.0.4 Darwin/21.5.0
+  # pattern missing via Juice/16 CFNetwork/1408.0.4 Darwin/22.5.0
+- regex: '^Juice/([\d\.]+)'
+  name: 'Juice'
+  version: '$1'
+
+  # total real world examples: 3891031
+  # pattern registered as ua Android Browser via just_audio/3.6.2 (Linux;Android 9) ExoPlayerLib/2.13.1
+  # pattern registered as ua Android Browser via just_audio/5.3.0 (Linux;Android 13) ExoPlayerLib/2.11.7
+  # pattern registered as ua Android Browser via just_audio/1.09 (Linux;Android 12) ExoPlayerLib/2.18.0
+- regex: 'just_audio/(\d+\.[.\d]+)'
+  name: 'Just Audio'
+  version: '$1'
+
+  # total real world examples: 20440
+  # pattern missing via Kasts/22.09; Syndication
+  # pattern missing via Kasts/22.02; Syndication
+  # Kasts is a convergent podcast application that looks good on desktop and mobile.
+  # https://apps.kde.org/kasts/ ?
+- regex: '^Kasts/(\d+\.[.\d]+)'
+  name: 'Kasts'
+  version: '$1'
+
+  # total real world examples: 541134
+  # pattern registered as ua Android Browser via MixerBox/12.33 (Linux;Android 11) ExoPlayerLib/2.11.1
+  # pattern registered as ua Mobile Safari via MixerBox/807.iOS (iPhone; iOS 14.4; en_US)
+  # pattern missing via MixerBox/1029 CFNetwork/1390 Darwin/22.0.0
+  # pattern missing via MixerBox%20Pro/10015 CFNetwork/1408.0.4 Darwin/22.5.0
+- regex: 'MixerBox(?:%20Pro)?/([.\d]+)'
+  name: 'MixerBox'
+  version: '$1'
+
+  # total real world examples: 908666
+  # pattern missing via MusicBee
+  # pattern missing via MusicBee/3.5
+  # pattern missing via MusicBee
+  # pattern missing via MusicBee/3.4
+  # pattern missing via MusicBee Lwpydw
+  # pattern missing via MusicBee VN23Ig
+- regex: '^MusicBee(?:/(\d+\.[.\d]+))?'
+  name: 'MusicBee'
+  version: '$1'
+
+# pattern missing via amarok/2.8.0 (Phonon/4.7.80; Phonon-GStreamer/4.7.80)
+- regex: '^amarok/(\d+\.[.\d]+)'
+  name: 'Amarok'
+  version: 
+
+# via Hubhopper/6.0.5 (Linux;Android 10) ExoPlayerLib/2.16.0
+- regex: 'Hubhopper/([\d\.]+)'
+  name: 'Hubhopper'
+  version: '$1'
+
+

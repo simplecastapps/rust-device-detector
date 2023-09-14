@@ -51,7 +51,12 @@
 -
   user_agent: Echo/1.0(APNG)
   os: [ ]
-  client: null
+  client:
+    type: mobile app
+    name: Alexa Media Player
+    version: "1.0"
+    engine: ""
+    engine_version: ""
   device:
     type: smart speaker
     brand: Amazon
