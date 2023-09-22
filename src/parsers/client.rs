@@ -69,7 +69,7 @@ impl ClientType {
 #[derive(Clone, Debug, Serialize)]
 pub struct Client {
     pub name: String,
-    pub version: String,
+    pub version: Option<String>,
     pub r#type: ClientType,
     pub engine: Option<String>,
     pub engine_version: Option<String>,
@@ -82,9 +82,11 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
     if let Some(res) = feed_readers::lookup(ua)? {
         return Ok(Some(res));
     }
+
     if let Some(res) = mobile_apps::lookup(ua, client_hints)? {
         return Ok(Some(res));
     }
+
     if let Some(res) = media_players::lookup(ua)? {
         return Ok(Some(res));
     }
@@ -112,8 +114,7 @@ pub struct ClientEntry {
     version: String,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(transparent)]
+#[derive(Debug)]
 pub struct ClientList {
     clients: Vec<ClientEntry>,
 }
@@ -135,6 +136,8 @@ impl ClientList {
                     version
                 };
 
+                let version = if version != "" { Some(version) } else { None };
+
                 caps.expand(&client.name, &mut name);
 
                 return Ok(Some(Client {
@@ -150,11 +153,41 @@ impl ClientList {
 
         Ok(None)
     }
+
     pub fn from_file(contents: &str) -> Result<ClientList> {
-        let res = serde_yaml::from_str(contents)?;
-        Ok(res)
+        #[derive(Debug, Deserialize)]
+        #[serde(transparent)]
+        pub struct YamlClientList {
+            clients: Vec<ClientEntry>,
+        }
+
+        #[allow(clippy::from_over_into)]
+        impl Into<ClientList> for YamlClientList {
+            fn into(self) -> ClientList {
+                ClientList {
+                    clients: self.clients,
+                }
+            }
+        }
+
+        let res: YamlClientList = serde_yaml::from_str(contents)?;
+        Ok(res.into())
     }
 }
+
+// The php version uses this to try and speed things up, match all
+// regexes at once, bottom up (the most generic are at the bottom)
+// and then short circuit if it doesn't matcher. But in rust this is
+// much slower than not doing it at all. Was worth a shot.
+
+// fn pre_match_regex(entries: &[ClientEntry]) -> LazyRegex {
+//     let mut patterns = Vec::with_capacity(entries.len());
+//
+//     for i in entries.iter().rev() {
+//         patterns.push(&*i.regex.pattern);
+//     }
+//     LazyRegex::new(itertools::intersperse(patterns.clone(), "|").collect::<String>())
+// }
 
 fn de_regex<'de, D>(deserializer: D) -> Result<LazyRegex, D::Error>
 where

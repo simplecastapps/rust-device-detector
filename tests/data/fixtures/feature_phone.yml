@@ -1464,7 +1464,7 @@
   browser_family: Unknown
 -
   user_agent: SIE-ME45/05 UP.Browser/5.0.1.1.102 (GUI)
-  os: []
+  os: [ ]
   client:
     type: browser
     name: Openwave Mobile Browser

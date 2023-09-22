@@ -7,17 +7,24 @@ use std::convert::Infallible;
 use std::net::SocketAddr;
 
 use crate::device_detector::DeviceDetector;
+use std::sync::Arc;
 
 async fn serve_request(
     req: Request<Body>,
-    device_detector: DeviceDetector,
+    detector: Arc<DeviceDetector>,
 ) -> Result<Response<Body>> {
     match (req.method(), req.uri().path()) {
         (&Method::POST, "/detect") => {
             // TODO prevent pulling entire body into memory in case of abuse
             let body = hyper::body::to_bytes(req.into_body()).await?;
             let body = String::from_utf8(body.to_vec())?;
-            let detection = device_detector.parse(&body, None).await.unwrap();
+
+            #[cfg(feature = "cache")]
+            let detection = detector.parse_cached(&body, None).await.expect("detection");
+
+            #[cfg(not(feature = "cache"))]
+            let detection = detector.parse(&body, None).expect("detection");
+
             let response = serde_json::to_string(&detection.to_value())?;
 
             Ok(Response::new(Body::from(response)))
@@ -28,17 +35,18 @@ async fn serve_request(
         _route => {
             let err = "valid routes:\n  POST /detect with a body containing referer\n  GET  /health for heartbeat";
             eprintln!("{}", err);
-            Response::builder()
+            Ok(Response::builder()
                 .status(StatusCode::NOT_FOUND)
-                .body(Body::from(err))
+                .body(Body::from(err))?)
         }
     }
-    .map_err(|x| x.into())
 }
 
 pub async fn server(listen_address: SocketAddr, device_detector: DeviceDetector) {
     // TODO make ip configurable
     eprintln!("Listening on {}", listen_address);
+
+    let device_detector = Arc::new(device_detector);
 
     let make_svc = make_service_fn(|_conn| {
         let device_detector = device_detector.clone();

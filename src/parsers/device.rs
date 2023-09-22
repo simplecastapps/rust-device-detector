@@ -272,9 +272,14 @@ pub fn lookup(
     }
 
     lazy_static::lazy_static! {
+        static ref APAD_TABLET: LazyRegex = user_agent_match(r#"Pad/APad"#);
         static ref ANDROID_TABLET: LazyRegex = user_agent_match(r#"Android( [\.0-9]+)?; Tablet;"#);
         static ref ANDROID_MOBILE: LazyRegex = user_agent_match(r#"Android( [\.0-9]+)?; Mobile;"#);
         static ref OPERA_TABLET: LazyRegex = user_agent_match(r#"Opera Tablet"#);
+    }
+
+    if device.device_type == Some(DeviceType::SmartPhone) && APAD_TABLET.is_match(ua)? {
+        device.device_type = Some(DeviceType::Tablet);
     }
 
     if device.device_type.is_none()
@@ -443,7 +448,8 @@ impl DeviceList {
 
                 let mut model: Option<String> =
                     match match_result.model.as_ref().map(|x| x.model.as_str()) {
-                        None => Some("".to_owned()),
+                        None => None,
+                        Some("") => None,
                         Some(model) => Some(
                             TD.replace_all(model.replace('_', " ").trim(), "")
                                 .into_owned(),

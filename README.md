@@ -5,7 +5,7 @@ All tests are ported straight from that library and must all pass. It is intende
 this will be in lock step with upstream, though it is possible some user agents will
 be exist here that are not accepted upstream, this should be rare.
 
-The latest update commit from parent is 6d427fe171b80fd6f632d3320f06bd14d29c53cb (Tue Jun 27 11:12:10 2023 +0200)
+The latest update commit from parent is dc4a9f2497a51bbc7dfd8f16fe9f697d562e8207 (Tue Jun 27 11:12:10 2023 +0200)
 
 If you wish to contribute non code fixes, it is recommended that you contribute
 your patches and tests upstream, then request updates here to bring these projects into parity.
@@ -51,6 +51,12 @@ Or you may call as a webserver, in which will allow for concurrency.
 > rust-device-detector -s -p 8080&
 > curl --data-binary 'Spotify/8.6.72 iOS/13.5.1 (iPhone9,2)' 'localhost:8080'
 # get a result.
+```
+
+In docker
+```shell
+> docker build . -t detector
+> docker run --init --name=detector --rm -it -p 8080:8080 detector
 ```
 
 And of course it is perfectly usable as a library by adding to your Cargo.toml

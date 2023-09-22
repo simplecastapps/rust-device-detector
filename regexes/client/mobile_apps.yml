@@ -620,7 +620,7 @@
 - regex: 'TuneIn Radio Pro(?:[^/]*)/(\d+[\.\d]+)'
   name: 'TuneIn Radio Pro'
   version: '$1'
-- regex: 'TuneIn(?:(?: |%20)Radio(?:[^/]*))/?(\d+[\.\d]+)?'
+- regex: 'TuneIn(?:(?: |%20)Radio(?:[^/]*))?/?(\d+[\.\d]+)?'
   name: 'TuneIn Radio'
   version: '$1'
 
@@ -1521,7 +1521,7 @@
   # pattern missing via Adori/1 CFNetwork/1408.0.4 Darwin/22.5.0
   # pattern missing via Adori/1 CFNetwork/1410.0.3 Darwin/22.6.0
   # pattern missing via Adori-Listen/1 CFNetwork/978.0.7 Darwin/18.6.0
-- regex: '^Adori(-Dev|-Listen)?/([\d\.]+)'
+- regex: '^Adori(?:-Dev|-Listen)?/([\d\.]+)'
   name: 'Adori'
   version: '$1'
 
@@ -1562,13 +1562,6 @@
   # pattern missing via AllHitMusicRadio/1.0 CFNetwork/1408.0.4 Darwin/22.5.0
 - regex: '^AllHitMusicRadio/([\d\.]+)'
   name: 'AllHitMusicRadio'
-  version: '$1'
-
-  # total real world examples: 444
-  # pattern registered as ua Aloha Browser via Aloha/2 CFNetwork/978.0.7 Darwin/18.7.0
-  # pattern registered as ua Aloha Browser via Aloha/4 CFNetwork/1399 Darwin/22.1.0
-- regex: '^Aloha/([\d\.]+)'
-  name: 'Aloha'
   version: '$1'
 
   # total real world examples: 532391
@@ -1618,7 +1611,7 @@
   # pattern registered as ua AntennaPod via AntennaPod/2.7.1
   # pattern registered as ua AntennaPod via AntennaPod/2.4.0
   # pattern missing via antenna/19 CFNetwork/711.1.16 Darwin/14.0.0
-- regex: '(?:^AntennaPod/|^de\.danoeh\.antennapod/|antenna/)([\d\.a-z]+)'
+- regex: '(?:^AntennaPod/|^de\.danoeh\.antennapod/|antenna/)([\d\.a-z]+)?'
   name: 'AntennaPod'
   version: '$1'
 
@@ -1691,9 +1684,9 @@
   # pattern missing via AirPodcasts/4023.100.98 CFNetwork/1474 Darwin/23.0.0
   # Playback initiated directly from the device
   # The Apple Podcasts app. What were they thinking?
-- regex: '^Podcasts/.*|^Balados/|^Podcasti/|^Podcastit/|^Podcasturi/|^Podcasty/|^Podcast’ler/|^Podcast%E2%80%99ler/|^Podkaster/|^Podcaster/.*\(.*\)|^Podcastok/|^Подкасти/|^Подкасты/|^פודקאסטים/|^البودكاست/|^पॉडकास्ट/|^พ็อดคาสท์/|^播客/|^팟캐스트/|ポッドキャスト/|^%D8%A7%D9%84%D8%A8%D9%88%D8%AF%D9%83%D8%A7%D8%B3%D8%AA/|^%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D1%8B/|^%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D0%B8/|^Podcastok/|^%D7%A4%D7%95%D7%93%D7%A7%D7%90%D7%A1%D7%98%D7%99%D7%9D/|^%ED%8C%9F%EC%BA%90%EC%8A%A4%ED%8A%B8/|^%D8%A7%D9%95%D8%B3%D9%85%D8%B9%D9%84%D9%8A/|^Podcaster/\d|^%E6%92%AD%E5%AE%A2/|^%E3%83%9D%E3%83%83%E3%83%89%E3%82%AD%E3%83%A3%E3%82%B9%E3%83%88/|^Podcast/|^%E0%B8%9E%E0%B9%87%E0%B8%AD%E0%B8%94%E0%B8%84%E0%B8%B2%E0%B8%AA%E0%B8%97%E0%B9%8C/\d|%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D1%82%D0%B0%D1%80/\d|^%E0%A4%AA%E0%A5%89%E0%A4%A1%E0%A4%95%E0%A4%BE%E0%A4%B8%E0%A5%8D%E0%A4%9F/\d|AirPodcasts/'
+- regex: '(?:^Podcasts/|^Balados/|^Podcasti/|^Podcastit/|^Podcasturi/|^Podcasty/|^Podcast’ler/|^Podcast%E2%80%99ler/|^Podkaster/|^Podcaster/|^Podcastok/|^Подкасти/|^Подкасты/|^פודקאסטים/|^البودكاست/|^पॉडकास्ट/|^พ็อดคาสท์/|^播客/|^팟캐스트/|ポッドキャスト/|^%D8%A7%D9%84%D8%A8%D9%88%D8%AF%D9%83%D8%A7%D8%B3%D8%AA/|^%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D1%8B/|^%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D0%B8/|^Podcastok/|^%D7%A4%D7%95%D7%93%D7%A7%D7%90%D7%A1%D7%98%D7%99%D7%9D/|^%ED%8C%9F%EC%BA%90%EC%8A%A4%ED%8A%B8/|^%D8%A7%D9%95%D8%B3%D9%85%D8%B9%D9%84%D9%8A/|^Podcaster/\d|^%E6%92%AD%E5%AE%A2/|^%E3%83%9D%E3%83%83%E3%83%89%E3%82%AD%E3%83%A3%E3%82%B9%E3%83%88/|^Podcast/|^%E0%B8%9E%E0%B9%87%E0%B8%AD%E0%B8%94%E0%B8%84%E0%B8%B2%E0%B8%AA%E0%B8%97%E0%B9%8C/|%D0%9F%D0%BE%D0%B4%D0%BA%D0%B0%D1%81%D1%82%D1%82%D0%B0%D1%80/|^%E0%A4%AA%E0%A5%89%E0%A4%A1%E0%A4%95%E0%A4%BE%E0%A4%B8%E0%A5%8D%E0%A4%9F/|AirPodcasts/)([\d\.]+)?'
   name: 'Apple Podcasts'
-  version: ''
+  version: '$1'
 
   # total real world examples: 2
   # pattern missing via Recordatorios/2466 CFNetwork/1329 Darwin/21.3.0
@@ -2166,7 +2159,7 @@
   # pattern registered as ua Mobile Safari via Himalaya/2.6.32 (iPhone; iOS 16.5.1; Scale/3.00; CFNetwork; iPhone13,4)
   # pattern missing via Himalaya_test/55 CFNetwork/894 Darwin/17.4.0
   # Himalaya is a podcast app
-- regex: '^Himalaya(_test)?/([\d\.]+)'
+- regex: '^Himalaya(?:_test)?/([\d\.]+)'
   name: 'Himalaya'
   version: '$1'
 
@@ -2294,7 +2287,7 @@
   # pattern missing via Listen/1 CFNetwork/1107.1 Darwin/19.0.0
   # pattern missing via Listen App/84 CFNetwork/1240.0.4 Darwin/20.6.0
   # pattern missing via Listen%20App/136 CFNetwork/1240.0.4 Darwin/20.6.0
-- regex: '^Listen(( |%20)App)?/([\d\.]+)'
+- regex: '^Listen(?:(?: |%20)App)?/([\d\.]+)'
   name: 'Listen'
   version: '$1'
 

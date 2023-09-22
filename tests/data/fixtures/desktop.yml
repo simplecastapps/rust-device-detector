@@ -8391,8 +8391,6 @@
     type: pim
     name: Apple Mail
     version: "1816"
-    engine: ""
-    engine_version: ""
   device:
     type: desktop
     brand: Apple
@@ -8409,8 +8407,6 @@
     type: pim
     name: Apple Mail
     version: "1874"
-    engine: ""
-    engine_version: ""
   device:
     type: desktop
     brand: Apple

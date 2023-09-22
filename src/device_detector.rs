@@ -1,8 +1,5 @@
 use anyhow::Result;
 
-#[cfg(test)]
-mod test;
-
 use serde::Serialize;
 
 use crate::client_hints::ClientHint;
@@ -15,7 +12,7 @@ use moka::future::Cache;
 
 // TODO we should Box KnownDevice as it is much larger than Bot
 #[allow(clippy::large_enum_variant)]
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum Detection {
     Known(KnownDevice),
     Bot(bot::Bot),
@@ -29,6 +26,27 @@ pub struct KnownDevice {
 }
 
 impl Detection {
+    pub fn get_bot(&self) -> Option<&bot::Bot> {
+        match self {
+            Self::Bot(bot) => Some(bot),
+            _ => None,
+        }
+    }
+
+    pub fn get_known_device(&self) -> Option<&KnownDevice> {
+        match self {
+            Self::Known(known) => Some(known),
+            _ => None,
+        }
+    }
+
+    /// Did we detect a bot? If not, then it is a known device.
+    pub fn is_bot(&self) -> bool {
+        match self {
+            Self::Bot(_) => true,
+            _ => false,
+        }
+    }
     /// This is purely to aid in generating test cases, you should not rely on this for
     /// actual production usage. Only useful for normal stuff, not bots, etc.
     pub fn to_test_case(self, ua: &str) -> String {
@@ -201,6 +219,7 @@ impl Detection {
                     "smart_speaker": known.is_smart_speaker(),
                     "pim": known.is_pim(),
                     "peripheral": known.is_peripheral(),
+                    "wearable": known.is_wearable(),
                     "phablet": known.is_phablet(),
                     "robot": false,
 
@@ -256,6 +275,10 @@ impl KnownDevice {
             if device::uses_mobile_browser(client) {
                 return true;
             }
+        }
+
+        if self.os.is_none() {
+            return false;
         }
 
         !self.is_desktop()
@@ -493,10 +516,22 @@ impl KnownDevice {
             })
             .unwrap_or(false)
     }
+
+    pub fn is_wearable(&self) -> bool {
+        self.device
+            .as_ref()
+            .map(|device| {
+                device
+                    .device_type
+                    .as_ref()
+                    .map(|x| *x == DeviceType::Wearable)
+                    .unwrap_or(false)
+            })
+            .unwrap_or(false)
+    }
 }
 
 // use std::alloc::System;
-// use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
 #[cfg(feature = "cache")]
 type DetectionCache = Cache<(String, Option<Vec<(String, String)>>), Detection>;
@@ -533,23 +568,14 @@ impl DeviceDetector {
         }
     }
 
-    #[cfg(not(feature = "cache"))]
-    pub async fn parse(
-        &self,
-        ua: &str,
-        headers: Option<Vec<(String, String)>>,
-    ) -> Result<Detection> {
-        self.parse_uncached(ua, headers).await
-    }
-
     #[cfg(feature = "cache")]
-    pub async fn parse(
+    pub async fn parse_cached(
         &self,
         ua: &str,
         headers: Option<Vec<(String, String)>>,
     ) -> Result<Detection> {
         if !self.caching {
-            return self.parse_uncached(ua, headers).await;
+            return self.parse(ua, headers);
         }
 
         let key = (ua.to_owned(), headers.clone());
@@ -558,7 +584,7 @@ impl DeviceDetector {
             return Ok(res);
         };
 
-        let known = self.parse_uncached(ua, headers.clone()).await?;
+        let known = self.parse(ua, headers.clone())?;
 
         let key: (String, Option<Vec<(String, String)>>) = (ua.to_owned(), headers);
         self.cache.insert(key, known.clone()).await;
@@ -566,14 +592,7 @@ impl DeviceDetector {
         Ok(known)
     }
 
-    async fn parse_uncached(
-        &self,
-        ua: &str,
-        headers: Option<Vec<(String, String)>>,
-    ) -> Result<Detection> {
-        // println!("parsing {}", ua);
-        // let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
-
+    pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
         if let Some(bot) = bot::lookup_bot(ua)? {
             return Ok(Detection::Bot(bot));
         }
@@ -591,9 +610,6 @@ impl DeviceDetector {
 
         let known = Detection::Known(KnownDevice { client, device, os });
 
-        // let ch = reg.change();
-        // println!("allocations over parse: {:#?} remaining {}", ch, ch.bytes_allocated - ch.bytes_deallocated);
-        // println!("allocations over parse {} {}", ch.bytes_allocated - ch.bytes_deallocated, size);
         Ok(known)
     }
 }

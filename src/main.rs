@@ -73,7 +73,6 @@ struct Args {
     gen_test_case: bool,
 }
 
-// use std::alloc::System;
 // use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
 // #[global_allocator]
@@ -102,9 +101,15 @@ async fn main() -> Result<(), ExitCode> {
         let mut ua = String::with_capacity(50); // may also use with_capacity if you can guess
         while std::io::stdin().read_line(&mut ua).unwrap() > 0 {
             let headers = None;
+
+            #[cfg(feature = "cache")]
+            let detection = detector
+                .parse_cached(&ua.trim_end(), headers)
+                .await
+                .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
+            #[cfg(not(feature = "cache"))]
             let detection = detector
                 .parse(&ua.trim_end(), headers)
-                .await
                 .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
 
             if args.gen_test_case {
@@ -134,7 +139,16 @@ async fn main() -> Result<(), ExitCode> {
             Some(ua) => {
                 // eprintln!("ua: {}", ua);
                 let headers = None;
-                let detection = detector.parse(&ua, headers).await.unwrap();
+
+                #[cfg(feature = "cache")]
+                let detection = detector
+                    .parse_cached(&ua, headers)
+                    .await
+                    .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
+                #[cfg(not(feature = "cache"))]
+                let detection = detector
+                    .parse(&ua, headers)
+                    .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
 
                 if args.gen_test_case {
                     println!("{}", detection.to_test_case(&ua));

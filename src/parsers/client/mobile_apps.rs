@@ -25,7 +25,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                     return Ok(Some(Client {
                         r#type: ClientType::MobileApp,
                         name: app.into(),
-                        version: "".to_owned(),
+                        version: None,
                         browser: None,
                         engine: None,
                         engine_version: None,

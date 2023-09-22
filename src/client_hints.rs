@@ -82,11 +82,10 @@ impl ClientHint {
                 }
 
                 "http-sec-ch-ua-model" | "sec-ch-ua-model" | "model" => {
-                    model = Some(value.trim_matches('"').to_owned());
-                }
-
-                "http-sec-ch-ua-full-version" | "sec-ch-ua-full-version" | "uafullversion" => {
-                    ua_full_version = Some(value.trim_matches('"').to_owned());
+                    let value = value.trim_matches('"');
+                    if value != "" {
+                        model = Some(value.to_owned());
+                    }
                 }
 
                 "http-sec-ch-ua-platform" | "sec-ch-ua-platform" | "platform" => {
@@ -103,6 +102,10 @@ impl ClientHint {
                     if value != "xmlhttprequest" {
                         app = Some(value.to_owned());
                     }
+                }
+
+                "http-sec-ch-ua-full-version" | "sec-ch-ua-full-version" => {
+                    ua_full_version = Some(value.trim_matches('"').to_owned());
                 }
 
                 // skipping "brands" / "fullVersionList" as I cannot find any examples of this

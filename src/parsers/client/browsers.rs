@@ -20,17 +20,22 @@ use crate::parsers::utils::LazyRegex;
 
 pub mod engines;
 
-lazy_static! {
-    static ref CLIENT_LIST: BrowserClientList = {
-        let contents = std::include_str!("../../../regexes/client/browsers.yml");
-        BrowserClientList::from_file(contents).expect("loading browsers.yml")
-    };
-    static ref CLIENT_HINT_MAPPING: ClientHintMapping = ClientHintMapping::new(vec![(
+use once_cell::sync::Lazy;
+
+// TODO FIXME deprecate and remove lazy_static as a dependency.
+static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
+    let contents = std::include_str!("../../../regexes/client/browsers.yml");
+    BrowserClientList::from_file(contents).expect("loading browsers.yml")
+});
+
+static CLIENT_HINT_MAPPING: Lazy<ClientHintMapping> = Lazy::new(|| {
+    ClientHintMapping::new(vec![(
         "Chrome".to_owned(),
-        vec!["Google Chrome".to_owned()]
-    )]);
-    static ref AVAILABLE_BROWSERS: AvailableBrowsers = AvailableBrowsers::default();
-}
+        vec!["Google Chrome".to_owned()],
+    )])
+});
+
+static AVAILABLE_BROWSERS: Lazy<AvailableBrowsers> = Lazy::new(|| AvailableBrowsers::default());
 
 pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Client>> {
     let client_from_ua: Option<Client> = CLIENT_LIST.lookup(ua)?;
@@ -53,14 +58,14 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
 
         if let Some((brand_version, brand_result)) = possible_results.get(0).map(|x| (x.1, x.2)) {
             let version = if let Some(ua_full_version) = &client_hints.ua_full_version {
-                ua_full_version
+                Some(ua_full_version.to_owned())
             } else {
-                brand_version
+                Some(brand_version.to_owned())
             };
 
             let res = Client {
                 name: brand_result.name.clone(),
-                version: version.clone(),
+                version: version,
                 r#type: ClientType::Browser,
                 engine: None,
                 engine_version: None,
@@ -74,21 +79,17 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         None
     };
 
-    if let Some(mut client_from_hints) = client_from_hints.as_mut() {
-        if client_from_hints.version == "2021.12"
-            || client_from_hints.version == "2022"
-            || client_from_hints.version == "2022.4"
+    if let Some(client_from_hints) = client_from_hints.as_mut() {
+        if client_from_hints.version.as_deref() == Some("2021.12")
+            || client_from_hints.version.as_deref() == Some("2022")
+            || client_from_hints.version.as_deref() == Some("2022.04")
         {
             client_from_hints.name = "Iridium".to_owned();
             // client_from_hints.short = "I1".to_owned();
 
-            // todo from browser
-            client_from_hints.engine = None;
-            client_from_hints.engine_version = None;
-
-            client_from_hints.version = client_from_ua
+            client_from_hints.engine = client_from_ua
                 .as_ref()
-                .map(|x| x.version.clone())
+                .map(|x| x.engine.clone())
                 .unwrap_or_default();
             client_from_hints.engine_version = client_from_ua
                 .as_ref()
@@ -144,14 +145,16 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                 client_from_hints.engine_version = client.engine_version.clone();
 
                 #[allow(clippy::collapsible_if)]
-                if !client.version.is_empty()
-                    && client.version.starts_with(&client_from_hints.version)
-                {
-                    if version_compare::compare(&client_from_hints.version, &client.version)
-                        .unwrap_or(Cmp::Eq)
-                        == Cmp::Lt
-                    {
-                        client_from_hints.version = client.version.clone();
+                if let Some(client_version) = &client.version {
+                    if let Some(client_from_hints_version) = &client_from_hints.version {
+                        if client_version.starts_with(client_from_hints_version) {
+                            if version_compare::compare(&client_from_hints_version, &client_version)
+                                .unwrap_or(Cmp::Eq)
+                                == Cmp::Lt
+                            {
+                                client_from_hints.version = client.version.clone();
+                            }
+                        }
                     }
                 }
             }
@@ -160,13 +163,13 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
 
     let mut res = client_from_hints.or(client_from_ua);
 
-    if let Some(mut client) = res.as_mut() {
+    if let Some(client) = res.as_mut() {
         if let Some(client_hints) = client_hints {
             if let Some(app_hint) = &client_hints.app {
                 if let Some(app_name) = super::hints::browsers::get_hint(app_hint)? {
                     if client.name != app_name {
                         client.name = app_name.to_owned();
-                        client.version = "".to_owned();
+                        client.version = None;
 
                         if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(app_name) {
                             lazy_static! {
@@ -277,9 +280,15 @@ impl BrowserClientList {
                     .search_by_name(&name)
                     .map(|browser| browser.to_owned());
 
+                let version = if version.is_empty() {
+                    None
+                } else {
+                    Some(version)
+                };
+
                 return Ok(Some(Client {
                     name,
-                    version,
+                    version: version,
                     r#type: ClientType::Browser,
                     engine,
                     engine_version,
@@ -337,7 +346,7 @@ impl BrowserClientList {
         // php code assumes the versions will be sorted as they are in
         // the file, but yaml doesn't guarantee that, so we sort them
         // lexographically, which is all we can do.
-        //
+
         engine_versions.sort_by(|&(a, _), &(b, _)| {
             version_compare::compare(a, b)
                 .unwrap_or(Cmp::Eq)

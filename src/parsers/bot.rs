@@ -29,8 +29,8 @@ pub struct Bot {
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct BotProducer {
-    pub name: String,
-    pub url: String,
+    pub name: Option<String>,
+    pub url: Option<String>,
 }
 
 #[derive(Debug)]
@@ -71,7 +71,16 @@ impl BotList {
 
         #[allow(clippy::from_over_into)]
         impl Into<BotEntry> for YamlBotEntry {
-            fn into(self) -> BotEntry {
+            fn into(mut self) -> BotEntry {
+                if let Some(producer) = self.producer.as_mut() {
+                    if producer.name.as_deref() == Some("") {
+                        producer.name = None;
+                    }
+                    if producer.url.as_deref() == Some("") {
+                        producer.url = None;
+                    }
+                }
+
                 BotEntry {
                     regex: user_agent_match(&self.regex),
                     name: self.name,

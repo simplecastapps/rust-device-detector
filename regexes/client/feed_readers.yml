@@ -171,6 +171,8 @@
 - regex: '^Newsboat/([a-z\d\.]+)'
   name: 'Newsboat'
   version: '$1'
+  url: 'https://newsboat.org/index.html'
+  type: 'Feed Reader'
 
   # total real world examples: 94832
   # pattern registered as ua Android Browser via Playapod/2.4.12 (Linux;Android 9) ExoPlayerLib/2.18.1
@@ -181,6 +183,8 @@
 - regex: '^Playapod(?: Lite)?/(\d+\.[.\d]+)'
   name: 'Playapod'
   version: '$1'
+  url: 'https://playapod.com/'
+  type: 'Feed Reader App'
 
   # total real world examples: 938
   # pattern missing via PodPuppy 1.0.0.0 github.com/felixwatts/PodPuppy
@@ -188,13 +192,13 @@
 - regex: 'PodPuppy (\d+\.[.\d]+)'
   name: 'PodPuppy'
   version: '$1'
+  url: 'https://github.com/felixwatts/PodPuppy'
+  type: 'Feed Reader'
 
   # total real world examples: 2608
   # pattern missing via PodQast/2.23 +https://gitlab.com/cy8aer/podqast
-  # pattern missing via PodQast/2.60  https://gitlab.com/cy8aer/podqast
-- regex: '^PodQast/(\d+\.[.\d]+)'
-  name: 'PodQast'
-  version: '$1'
+  # pattern missing via PodQast/2.60  https://gitlab.com/cy8aer/podqast #- regex: '^PodQast/(\d+\.[.\d]+)' #  name: 'PodQast'
+  #  version: '$1'
 
   # total real world examples: 1213
   # pattern registered as ua Reeder via Reeder/4020.79.01 CFNetwork/1406.0.4 Darwin/22.4.0
@@ -202,3 +206,5 @@
 - regex: '^Reeder/([\d\.]+)'
   name: 'Reeder'
   version: '$1'
+  url: 'https://reederapp.com/'
+  type: 'Feed Reader'
