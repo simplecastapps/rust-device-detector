@@ -1,0 +1,1 @@
+These tests are (for the most part) equivalent to php tests, and they should all pass, always. As new versions are released, update the yaml files here and then fix the code so that all these tests pass.
