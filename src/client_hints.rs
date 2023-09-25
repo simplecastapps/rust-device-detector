@@ -96,6 +96,10 @@ impl ClientHint {
                 | "sec-ch-ua-platform-version"
                 | "platformversion" => {
                     platform_version = Some(value.trim_matches('"').to_owned());
+                    // TODO remove blanks from other values and see if tests pass.
+                    if platform_version.as_deref() == Some("") {
+                        platform_version = None;
+                    }
                 }
 
                 "http-x-requested-with" | "x-requested-with" => {

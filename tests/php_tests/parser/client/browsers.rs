@@ -100,8 +100,6 @@ fn basic(idx: usize, value: &mut Value) -> Result<()> {
         ua
     );
 
-    dbg!(&dd_res);
-    dbg!(&test_client);
     let dd_browser_engine: Option<&str> = dd_res
         .get_known_device()
         .and_then(|dev| dev.client.as_ref())

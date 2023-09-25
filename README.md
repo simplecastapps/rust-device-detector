@@ -1,15 +1,17 @@
 # Introduction
 This is a straight port from https://github.com/matomo-org/device-detector.git.
 
-All tests are ported straight from that library and must all pass. It is intended that
+All tests are ported directly from that library and must all pass. It is intended that
 this will be in lock step with upstream, though it is possible some user agents will
 be exist here that are not accepted upstream, this should be rare.
 
-The latest update commit from parent is dc4a9f2497a51bbc7dfd8f16fe9f697d562e8207 (Tue Jun 27 11:12:10 2023 +0200)
+The latest update commit from parent php project was (Wed Sep 20 08:36:33 2023 +0200)
+https://github.com/matomo-org/device-detector/commit/361f4e1905fbe57b151a185056587551e6c6140a
 
 If you wish to contribute non code fixes, it is recommended that you contribute
 your patches and tests upstream, then request updates here to bring these projects into parity.
 
+Any contributions to fix reproducible inaccuracies or improve performance are greatly appreciated.
 
 # Build
 ```shell

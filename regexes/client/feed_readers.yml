@@ -23,10 +23,6 @@
   url: 'http://lincgeek.org/bashpodder/'
   type: 'Feed Reader'
 
-  # total real world examples: 19
-  # pattern registered as ua Breaker via Breaker/5.0.20 (iPhone; iOS 16.0.3; Scale/3.00)
-  # pattern registered as ua Breaker via Breaker/5.0.20 (iPhone; iOS 14.7.1; Scale/3.00)
-  # pattern registered as ua Breaker via Breaker/5.0.20 (iPhone; iOS 16.0; Scale/3.00)
 - regex: 'Breaker/v?([\d\.]+)'
   name: 'Breaker'
   version: '$1'
@@ -141,68 +137,36 @@
   url: 'https://github.com/swanson/stringer'
   type: 'Feed Reader'
 
-  # total real world examples: 3018
-  # pattern missing via castero 0.9.5 <https://github.com/xgi/castero>
-  # pattern missing via castero 0.9.5 <https://github.com/xgi/castero>
-  # pattern missing via castero 0.9.4 <https://github.com/xgi/castero>
-  # pattern missing via castero 0.9.3 <https://github.com/xgi/castero>
-  # castero is a TUI podcast client for the terminal
 - regex: '^castero (\d+\.[.\d]+)'
   name: 'castero'
   version: '$1'
   url: 'https://github.com/xgi/castero'
   type: 'Feed Reader'
 
-  # total real world examples: 22118
-  # pattern missing via castget 1.2.4 (castget rss enclosure downloader)
-  # pattern missing via castget 2.0.1 (castget rss enclosure downloader)
-  # pattern missing via castget 1.2.4 (castget rss enclosure downloader)
-  # pattern missing via castget 2.0.0 (castget rss enclosure downloader)
-  # pattern missing via castget 1.0.1 (castget rss enclosure downloader)
 - regex: '^castget (\d+\.[.\d]+)'
   name: 'castget'
   version: '$1'
   url: 'https://castget.johndal.com/'
   type: 'Feed Reader'
 
-  # total real world examples: 24586
-  # pattern missing via Newsboat/2.29.0 (Linux x86_64)
-  # pattern missing via Newsboat/2.30.1 (Macintosh; Intel Mac OS X)
 - regex: '^Newsboat/([a-z\d\.]+)'
   name: 'Newsboat'
   version: '$1'
   url: 'https://newsboat.org/index.html'
   type: 'Feed Reader'
 
-  # total real world examples: 94832
-  # pattern registered as ua Android Browser via Playapod/2.4.12 (Linux;Android 9) ExoPlayerLib/2.18.1
-  # pattern registered as ua Android Browser via Playapod Lite/1.4.7 (Linux;Android 9) ExoPlayerLib/2.8.4
-  # pattern missing via Playapod/2.4.11
-  # pattern missing via Playapod/2.4.13
-  # Best Cross-Platform Podcast and News App
 - regex: '^Playapod(?: Lite)?/(\d+\.[.\d]+)'
   name: 'Playapod'
   version: '$1'
   url: 'https://playapod.com/'
   type: 'Feed Reader App'
 
-  # total real world examples: 938
-  # pattern missing via PodPuppy 1.0.0.0 github.com/felixwatts/PodPuppy
-  # pattern missing via PodPuppy 1.0.0.0 github.com/felixwatts/PodPuppy
 - regex: 'PodPuppy (\d+\.[.\d]+)'
   name: 'PodPuppy'
   version: '$1'
   url: 'https://github.com/felixwatts/PodPuppy'
   type: 'Feed Reader'
 
-  # total real world examples: 2608
-  # pattern missing via PodQast/2.23 +https://gitlab.com/cy8aer/podqast
-  # pattern missing via PodQast/2.60  https://gitlab.com/cy8aer/podqast #- regex: '^PodQast/(\d+\.[.\d]+)' #  name: 'PodQast'
-  #  version: '$1'
-
-  # total real world examples: 1213
-  # pattern registered as ua Reeder via Reeder/4020.79.01 CFNetwork/1406.0.4 Darwin/22.4.0
-  # pattern registered as ua Reeder via Reeder/5040002 CFNetwork/1408.0.4 Darwin/22.5.0
 - regex: '^Reeder/([\d\.]+)'
   name: 'Reeder'
   version: '$1'

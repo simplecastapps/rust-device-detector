@@ -179,6 +179,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                             }
 
                             if BLINK_REGEX.is_match(ua)? {
+                                println!("MATCH");
                                 client.engine = Some("Blink".to_owned());
 
                                 if let Some(engine) = &client.engine {
@@ -192,12 +193,11 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                                 }
 
                                 client.browser = Some(client_browser);
+                            } else {
+                                println!("NO MATCH");
                             }
                         } else {
-                            return Err(anyhow::anyhow!(
-                                "Browser hint {} not found in known browser list!",
-                                &app_hint
-                            ));
+                            println!("BROWSER NOT FOUND");
                         }
                     }
                 }

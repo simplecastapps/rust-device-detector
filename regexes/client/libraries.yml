@@ -5,10 +5,7 @@
 # @license http://www.gnu.org/licenses/lgpl.html LGPL v3 or later
 ###############
 
-  # total real world examples: 282010
-  # pattern registered as ua got via got (https://github.com/sindresorhus/got)
-  # pattern missing via got/8.3.2 (https://github.com/sindresorhus/got)
-  # got - a nodejs library
+# got - a nodejs library
 - regex: '^got(?:/(\d+\.[.\d]+))? \('
   name: 'got'
   version: '$1'
@@ -86,10 +83,7 @@
   name: 'Guzzle (PHP HTTP Client)'
   version: '$1'
 
-  # total real world examples: 354
-  # pattern registered as ua curl via Symfony HttpClient/Curl
-  # pattern missing via Symfony HttpClient/Native
-  # symphony php http client
+# symphony php http client
 - regex: '^Symfony HttpClient/'
   name: 'Symfony'
   version: '$1'
@@ -262,10 +256,6 @@
   name: 'Aria2'
   version: '$1'
 
-  # total real world examples: 107
-  # pattern registered as ua uTorrent via BTWebClient/1870(43938)
-  # pattern registered as ua uTorrent via BTWebClient/180B(9704)
-  # pattern missing via uTorrent/2210(25110)
 - regex: '(?:BTWebClient/|^uTorrent/)'
   name: 'uTorrent'
   version: ''
@@ -390,152 +380,94 @@
   name: Axios
   version: '$1'
 
-  # total real world examples: 47871
-  # pattern missing via CarrierWave/2.2.4
-  # Classier solution for file uploads for Rails, Sinatra and other Ruby web frameworks
+# Classier solution for file uploads for Rails, Sinatra and other Ruby web frameworks
 - regex: '^CarrierWave/(\d+\.[.\d]+)'
   name: 'CarrierWave'
   version: '$1'
 
-  # total real world examples: 2822
-  # pattern missing via Deno/1.26.1
 - regex: '^Deno/(\d+\.[.\d]+)'
   name: 'Deno'
   version: '$1'
 
-  # total real world examples: 7019
-  # pattern missing via Down/5.3.1
-  # Streaming downloads using net/http, http.rb, HTTPX or wget (ruby)
+# Streaming downloads using net/http, http.rb, HTTPX or wget (ruby)
 - regex: '^Down/(\d+\.[.\d]+)'
   name: 'Down'
   version: '$1'
 
-  # total real world examples: 55146391
-  # pattern missing via Lavf/60.3.100
-  # various programs can use this, like vlc, but the underlying lib is ffmpeg
+# various programs can use this, like vlc, but the underlying lib is ffmpeg
 - regex: '^Lavf/'
   name: 'ffmpeg'
   version: '$1'
 
-  # total real world examples: 15422981
-  # pattern missing via FileDownloader/1.7.7
-  # pattern missing via FileDownloader/1.7.7 X 9I/Q
 - regex: '^FileDownloader/(\d+\.[.\d]+)'
   name: 'FileDownloader'
   version: '$1'
 
-  # total real world examples: 7617
-  # pattern missing via git-annex/10.20230407
-  # pattern missing via git-annex/10.20221105-g4c291fafb
-  # Allows managing large files with git, without storing the file contents in git
+# Allows managing large files with git, without storing the file contents in git
 - regex: '^git-annex/(\d+\.[.\d]+)'
   name: 'git-annex'
   version: '$1'
 
-  # total real world examples: 292372
-  # pattern missing via GStreamer souphttpsrc 1.18.0 libsoup/2.70.0
-  # pattern missing via GStreamer souphttpsrc libsoup/2.52.2
 - regex: '^GStreamer(?: souphttpsrc)[ /](\d+\.[.\d]+)?'
   name: 'GStreamer'
   version: '$1'
 
-  # total real world examples: 2
-  # pattern missing via HTTP-Tiny/0.076
-  # A small, simple, correct HTTP/1.1 client (Perl)
+# A small, simple, correct HTTP/1.1 client (Perl)
 - regex: '^HTTP-Tiny/(\d+\.[.\d]+)'
   name: 'HTTP:Tiny'
   version: '$1'
 
-  # total real world examples: 735
-  # pattern missing via KaiOS Downloader
-  # pattern missing via KaiOS Downloader PodKast
 - regex: 'KaiOS Downloader'
   name: 'KaiOS Downloader'
   version: ''
 
-  # total real world examples: 1232
-  # pattern missing via libsoup/2.68.2
-  # pattern missing via libsoup/3.4.1
-  # HTTP client/server library for GNOME
+# HTTP client/server library for GNOME
 - regex: '^libsoup/(\d+\.[.\d]+)'
   name: 'libsoup'
   version: '$1'
 
-  # total real world examples: 292
-  # pattern registered as ua Android Browser via Android.LVLDM
 - regex: '^Android\.LVLDM$'
   name: 'Android License Verification Library'
   version: '$1'
 
-  # total real world examples: 25944337
-  # pattern missing via PRDownloader
-  # A file downloader library for Android with pause and resume support
+# A file downloader library for Android with pause and resume support
 - regex: '^PRDownloader$'
   name: 'PRDownloader'
   version: ''
 
-  #no examples for Request (node) (request\.js)
-  # total real world examples: 32
-  # pattern missing via reqwest/0.9.19
-  # a rust http library
+# a rust http library
 - regex: '^reqwest/(\d+\.[.\d]+)'
   name: 'reqwest'
   version: '$1'
 
-  # total real world examples: 104562
-  # pattern missing via resty-requests
-  # lua http library
+# lua http library
 - regex: '^resty-requests'
   name: 'resty-requests'
   version: ''
 
-  # total real world examples: 12660664
-  # pattern missing via Ruby
-  # ruby core lib http download
+# ruby core lib http download
 - regex: '^Ruby'
   name: 'ruby'
   version: ''
 
-  # total real world examples: 1827
-  # pattern missing via SafariViewService/8614.1.25.0.31 CFNetwork/1390 Darwin/22.0.0
-  # SFSafariViewController, some safari service
+# SFSafariViewController, some safari service
 - regex: '^SafariViewService/(\d+\.[.\d]+)'
   name: 'Safari View Service'
   version: '$1'
 
-  # total real world examples: 62833
-  # pattern missing via undici
-  # a nodejs lib
+# a nodejs lib
 - regex: '^undici$'
   name: 'undici'
   version: ''
 
-  # total real world examples: 711
-  # pattern missing via URL/Emacs Emacs/28.2 (TTY; x86_64-pc-linux-gnu)
-  # pattern missing via URL/Emacs Emacs/29.0.60 (OpenStep; x86_64-apple-darwin22.1.0)
-  # URL, an emacs plugin
+# URL, an emacs plugin
 - regex: '^URL/Emacs Emacs/(\d+\.[.\d]+)'
   name: 'Emacs'
   version: '$1'
 
-  # total real world examples: 16952
-  # pattern missing via FDM/5.1.38.7312
-  # pattern missing via FDM 3.x
 - regex: '^FDM[ /]([\d\.a-z]+)'
   name: 'Free Download Manager'
   version: '$1'
-
-  # total real world examples: 6656954498
-  # pattern registered as ua Mobile Safari via AppleCoreMedia/1.0.0.16G114 (iPod touch; U; CPU OS 12_4_2 like Mac OS X; en_us)
-  # pattern missing via AppleCoreMedia/1.0.0.19A583 (Macintosh; U; Intel Mac OS X 10_15; en_us)
-  # AppleCoreMedia library
-  # a ton of applications in the apple ecosystem couldn't set their ua for years
-  # because apple didn't give them a way to do it, so they all got this user agent
-  # https://podnews.net/article/applecoremedia-user-agent
-  # unfortunately most of these are caught by the Mobile Safari UA, and I don't see a way to stop it
-  #- regex: '^AppleCoreMedia/(\d+\.[.\da-z]+)'
-  #  name: 'AppleCoreMedia'
-  #  version: '$1'
 
 # 'https://github.com/lingochamp/okdownload'
 - regex: 'OkDownload/([\d\.]+)'

@@ -185,6 +185,7 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("TOS", "TmaxOS"),
         ("UBT", "Ubuntu"),
         ("WAS", "watchOS"),
+        ("WER", "Wear OS"),
         ("WTV", "WebTV"),
         ("WHS", "Whale OS"),
         ("WIN", "Windows"),
@@ -213,7 +214,7 @@ fn os_families() -> HashMap<String, Vec<String>> {
             "Android",
             vec![
                 "AND", "CYN", "FIR", "REM", "RZD", "MLD", "MCD", "YNS", "GRI", "HAR", "ADR", "CLR",
-                "BOS", "REV", "LEN", "SIR", "RRS",
+                "BOS", "REV", "LEN", "SIR", "RRS", "WER",
             ],
         ),
         ("AmigaOS", vec!["AMG", "MOR"]),

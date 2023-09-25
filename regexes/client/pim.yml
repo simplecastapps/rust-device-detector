@@ -128,12 +128,6 @@
   name: 'NAVER Mail'
   version: '$1'
 
-  # total real world examples: 983
-  # pattern missing via Mail/1283 CFNetwork/520.5.1 Darwin/11.4.2 (x86_64) (MacBookPro5%2C4)
-  # pattern missing via Mail/3731.600.7 CFNetwork/1408.0.4 Darwin/22.5.0
-  # pattern missing via Mail/3731.0.7.2.51 CFNetwork/1390 Darwin/22.0.0
-  # pattern missing via Mail/3696.120.41 CFNetwork/1335.0.3 Darwin/21.6.0
 - regex: '^Mail/([\d\.]+)'
   name: 'Apple Mail'
   version: '$1'
-

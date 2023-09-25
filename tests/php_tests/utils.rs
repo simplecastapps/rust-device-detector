@@ -12,7 +12,6 @@ lazy_static::lazy_static! {
     pub(crate) static ref DD: DeviceDetector = DeviceDetector::new();
 }
 
-
 pub fn memory_test(f: &dyn Fn() -> Result<()>) -> Result<Stats> {
     let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
     f()?;

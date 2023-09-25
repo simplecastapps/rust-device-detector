@@ -6,11 +6,14 @@ use serde::{Deserialize, Serialize};
 use serde_yaml::Value;
 
 use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 use version_compare::{self, Version};
 
 use super::utils::user_agent_match;
 use super::vendor_fragments;
+
+use std::borrow::Cow;
 
 use crate::client_hints::ClientHint;
 use crate::parsers::client::{Client, ClientType};
@@ -173,52 +176,73 @@ pub fn lookup(
     client_hints: Option<&ClientHint>,
     os_info: Option<&OS>,
 ) -> Result<Option<Device>> {
-    // TODO make this into a function
-    #[allow(clippy::never_loop)]
-    let mut device = loop {
-        if let Some(res) = televisions::lookup(ua)? {
-            break res;
+    static ANDROID_10_MODEL: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"(Android 10[.\d]*; K)(?: Build/|[;)])").unwrap());
+
+    // this sets the model into the device string so that further
+    // user agent level device detection will find it.
+    let ua: Cow<'_, str> = 'ua: {
+        if let Some(client_hints) = &client_hints {
+            if let Some(model) = &client_hints.model {
+                if let Some(captures) = ANDROID_10_MODEL.captures(ua)? {
+                    let os_version: &str =
+                        os_info.and_then(|os| os.version.as_deref()).unwrap_or("10");
+                    let replacement = format!("Android {}; {}", os_version, model);
+                    let res = ua.replace(&captures[1], &replacement);
+
+                    break 'ua Cow::Owned(res);
+                }
+            }
         }
 
-        if let Some(res) = shell_tvs::lookup(ua)? {
-            break res;
-        }
-        if let Some(res) = notebooks::lookup(ua)? {
-            break res;
+        Cow::Borrowed(ua)
+    };
+    println!("post ua: {}", &ua);
+
+    let mut device = 'dev: {
+        if let Some(res) = televisions::lookup(&ua)? {
+            break 'dev res;
         }
 
-        if let Some(res) = consoles::lookup(ua)? {
-            break res;
+        if let Some(res) = shell_tvs::lookup(&ua)? {
+            break 'dev res;
+        }
+        if let Some(res) = notebooks::lookup(&ua)? {
+            break 'dev res;
         }
 
-        if let Some(res) = car_browsers::lookup(ua)? {
-            break res;
+        if let Some(res) = consoles::lookup(&ua)? {
+            break 'dev res;
         }
 
-        if let Some(res) = cameras::lookup(ua)? {
-            break res;
-        }
-        if let Some(res) = portable_media_players::lookup(ua)? {
-            break res;
+        if let Some(res) = car_browsers::lookup(&ua)? {
+            break 'dev res;
         }
 
-        if let Some(res) = mobiles::lookup(ua)? {
-            break res;
+        if let Some(res) = cameras::lookup(&ua)? {
+            break 'dev res;
+        }
+        if let Some(res) = portable_media_players::lookup(&ua)? {
+            break 'dev res;
         }
 
-        break Device {
+        if let Some(res) = mobiles::lookup(&ua)? {
+            break 'dev res;
+        }
+
+        Device {
             device_type: None,
             model: None,
             brand: None,
             ..Default::default()
-        };
+        }
     };
 
     lazy_static::lazy_static! {
         static ref TOUCH: LazyRegex = user_agent_match(r#"Touch"#);
     }
 
-    if TOUCH.is_match(ua)? {
+    if TOUCH.is_match(&ua)? {
         device.touch_enabled = true;
     }
 
@@ -233,7 +257,7 @@ pub fn lookup(
     }
 
     if device.brand.is_none() {
-        if let Some(brand) = vendor_fragments::lookup(ua)? {
+        if let Some(brand) = vendor_fragments::lookup(&ua)? {
             device.brand = Some(brand.to_owned());
         }
     }
@@ -254,16 +278,17 @@ pub fn lookup(
 
         if device.device_type.is_none() {
             lazy_static! {
-                static ref CHROME: LazyRegex = user_agent_match(r#"Chrome/[\.0-9]"#);
+                static ref CHROME: LazyRegex = user_agent_match(r#"Chrome/[\.0-9]*"#);
                 static ref SAFARI_PHONE: LazyRegex =
                     user_agent_match(r#"(?:Mobile|eliboM) Safari/"#);
                 static ref SAFARI_TAB: LazyRegex = user_agent_match(r#"(?!Mobile )Safari"#);
             };
             if let Some(family) = &os.family {
-                if family == "Android" && CHROME.is_match(ua)? {
-                    if SAFARI_PHONE.is_match(ua)? {
+                if family == "Android" && CHROME.is_match(&ua)? {
+                    if SAFARI_PHONE.is_match(&ua)? {
+                        println!("SETTING SMARTPHONE");
                         device.device_type = Some(DeviceType::SmartPhone);
-                    } else if SAFARI_TAB.is_match(ua)? {
+                    } else if SAFARI_TAB.is_match(&ua)? {
                         device.device_type = Some(DeviceType::Tablet);
                     }
                 }
@@ -278,17 +303,17 @@ pub fn lookup(
         static ref OPERA_TABLET: LazyRegex = user_agent_match(r#"Opera Tablet"#);
     }
 
-    if device.device_type == Some(DeviceType::SmartPhone) && APAD_TABLET.is_match(ua)? {
+    if device.device_type == Some(DeviceType::SmartPhone) && APAD_TABLET.is_match(&ua)? {
         device.device_type = Some(DeviceType::Tablet);
     }
 
     if device.device_type.is_none()
-        && (ANDROID_TABLET.is_match(ua)? || OPERA_TABLET.is_match(ua)?)
+        && (ANDROID_TABLET.is_match(&ua)? || OPERA_TABLET.is_match(&ua)?)
     {
         device.device_type = Some(DeviceType::Tablet);
     }
 
-    if device.device_type.is_none() && ANDROID_MOBILE.is_match(ua)? {
+    if device.device_type.is_none() && ANDROID_MOBILE.is_match(&ua)? {
         device.device_type = Some(DeviceType::SmartPhone);
     }
 
@@ -332,7 +357,7 @@ pub fn lookup(
             if let Some(os_version) = os.version.as_ref() {
                 if let Some(os_version) = Version::from(os_version) {
                     if os.name == "Windows RT"
-                        || (os.name == "Windows" && os_version >= *V8 && is_touch(ua)?)
+                        || (os.name == "Windows" && os_version >= *V8 && is_touch(&ua)?)
                     {
                         device.device_type = Some(DeviceType::Tablet);
                     }
@@ -343,32 +368,38 @@ pub fn lookup(
 
     lazy_static::lazy_static! {
         static ref OPERA: LazyRegex = user_agent_match(r#"Opera TV Store| OMI/"#);
-        static ref ANDR0ID: LazyRegex = user_agent_match(r#"Andr0id|Android TV|\(lite\) TV"#);
+        static ref ANDR0ID: LazyRegex = user_agent_match(r#"Andr0id|Android TV|\(lite\) TV|BRAVIA"#);
         static ref TIZEN: LazyRegex = user_agent_match(r#"SmartTV|Tizen.+ TV .+$"#);
         static ref GENERIC_TV: LazyRegex = user_agent_match(r#"\(TV;"#);
     };
 
-    if OPERA.is_match(ua)? {
+    if OPERA.is_match(&ua)? {
         device.device_type = Some(DeviceType::Television);
     }
-    if ANDR0ID.is_match(ua)? {
+    if ANDR0ID.is_match(&ua)? {
         device.device_type = Some(DeviceType::Television);
     }
-    if device.device_type.is_none() && TIZEN.is_match(ua)? {
+    if device.device_type.is_none() && TIZEN.is_match(&ua)? {
         device.device_type = Some(DeviceType::Television);
+    }
+
+    if let Some(client) = client {
+        if [
+            "Kylo",
+            "Espial TV Browser",
+            "LUJO TV Browser",
+            "LogicUI TV Browser",
+            "Open TV Browser",
+        ]
+        .iter()
+        .any(|x| *x == client.name)
+        {
+            device.device_type = Some(DeviceType::Television);
+        }
     }
 
     if device.device_type.is_none() {
-        if let Some(client) = client {
-            if ["Kylo", "Espial TV Browser"]
-                .iter()
-                .any(|x| *x == client.name)
-            {
-                device.device_type = Some(DeviceType::Television);
-            }
-        }
-
-        if GENERIC_TV.is_match(ua)? {
+        if GENERIC_TV.is_match(&ua)? {
             device.device_type = Some(DeviceType::Television);
         }
     }
@@ -380,12 +411,12 @@ pub fn lookup(
     if let Some(device_type) = &device.device_type {
         if *device_type != DeviceType::Desktop
             && ua.contains("Desktop")
-            && DESKTOP_FRAGMENT.is_match(ua)?
+            && DESKTOP_FRAGMENT.is_match(&ua)?
         {
             device.device_type = Some(DeviceType::Desktop);
         }
     }
-    if device.device_type.is_none() && DESKTOP_FRAGMENT.is_match(ua)? {
+    if device.device_type.is_none() && DESKTOP_FRAGMENT.is_match(&ua)? {
         device.device_type = Some(DeviceType::Desktop);
     }
 
@@ -671,11 +702,14 @@ fn model_match(model: &ModelEntry, ua: &str) -> Result<Option<ModelMatchResult>>
             }
             _ => None,
         },
-        None => Some(ModelMatchResult {
-            model: model.model.clone(),
-            device: model.device.as_ref().map(|x| x.to_owned()),
-            brand: None,
-        }),
+        None => {
+            println!("NO BRAND 2");
+            Some(ModelMatchResult {
+                model: model.model.clone(),
+                device: model.device.as_ref().map(|x| x.to_owned()),
+                brand: None,
+            })
+        }
     };
 
     Ok(res)

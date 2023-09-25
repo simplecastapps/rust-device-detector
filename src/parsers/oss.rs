@@ -123,9 +123,6 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
         }
     }
 
-    // dbg!(&os_from_hints);
-    // dbg!(&os_from_ua);
-
     let mut res = os_from_hints.or(os_from_ua);
 
     if let Some(os) = &mut res {

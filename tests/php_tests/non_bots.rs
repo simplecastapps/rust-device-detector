@@ -14,7 +14,7 @@ use seq_macro::seq;
 
 // the number of base files, not counting bots.yml. If a new files is added, tests
 // will fail until you update these two numbers. Could probably improve this with proc macros.
-const NUM_FILES: usize = 69;
+const NUM_FILES: usize = 71;
 
 seq!(N in 001..=69 {
     #[test]
