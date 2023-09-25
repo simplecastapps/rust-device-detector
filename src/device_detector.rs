@@ -534,7 +534,7 @@ impl KnownDevice {
 // use std::alloc::System;
 
 #[cfg(feature = "cache")]
-type DetectionCache = Cache<(String, Option<Vec<(String, String)>>), Detection>;
+type DetectionCache = Cache<String, Detection>;
 
 #[derive(Clone)]
 pub struct DeviceDetector {
@@ -578,16 +578,13 @@ impl DeviceDetector {
             return self.parse(ua, headers);
         }
 
-        let key = (ua.to_owned(), headers.clone());
-
-        if let Some(res) = self.cache.get(&key) {
+        if let Some(res) = self.cache.get(ua) {
             return Ok(res);
         };
 
         let known = self.parse(ua, headers.clone())?;
 
-        let key: (String, Option<Vec<(String, String)>>) = (ua.to_owned(), headers);
-        self.cache.insert(key, known.clone()).await;
+        self.cache.insert(ua.to_owned(), known.clone()).await;
 
         Ok(known)
     }
