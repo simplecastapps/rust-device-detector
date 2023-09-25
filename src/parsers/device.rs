@@ -197,7 +197,6 @@ pub fn lookup(
 
         Cow::Borrowed(ua)
     };
-    println!("post ua: {}", &ua);
 
     let mut device = 'dev: {
         if let Some(res) = televisions::lookup(&ua)? {
@@ -286,7 +285,6 @@ pub fn lookup(
             if let Some(family) = &os.family {
                 if family == "Android" && CHROME.is_match(&ua)? {
                     if SAFARI_PHONE.is_match(&ua)? {
-                        println!("SETTING SMARTPHONE");
                         device.device_type = Some(DeviceType::SmartPhone);
                     } else if SAFARI_TAB.is_match(&ua)? {
                         device.device_type = Some(DeviceType::Tablet);
@@ -703,7 +701,6 @@ fn model_match(model: &ModelEntry, ua: &str) -> Result<Option<ModelMatchResult>>
             _ => None,
         },
         None => {
-            println!("NO BRAND 2");
             Some(ModelMatchResult {
                 model: model.model.clone(),
                 device: model.device.as_ref().map(|x| x.to_owned()),
