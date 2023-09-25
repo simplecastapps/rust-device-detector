@@ -664,11 +664,7 @@
   name: 'Pandora'
   version: ''
 
-  # total real world examples: 8182605
-  # pattern registered as ua NPR One via NPROneAndroid
-  # pattern missing via NPR%20One/234 CFNetwork/1197 Darwin/20.0.0
-  # pattern missing via NPR%20One/371 CFNetwork/1402.0.8 Darwin/22.2.0
-- regex: '(?:^NPR%20One/([\d\.]+)|^NPROneAndroid)'
+- regex: '(?:^NPROneAndroid$|^NPR%20One/([\d\.]+))'
   name: 'NPR One'
   version: '$1'
 
@@ -2143,9 +2139,9 @@
   # pattern missing via hermespod.com/v1.5.x
   # pattern missing via  hermespod.com/v1.5.x
   # HermesPod is the easiest way to subscribe, download and listen to podcasts. It's a Windows app.
-- regex: 'hermespod\.com/([\d\.a-z]+)'
+- regex: 'hermespod\.com/v?([\d\.a-z]+)'
   name: 'HermesPod'
-  version: '$'
+  version: '$1'
 
   # total real world examples: 204
   # pattern missing via HiCast/1 CFNetwork/1107.1 Darwin/19.0.0
@@ -2923,12 +2919,6 @@
 # via UCast/1 CFNetwork/1406.0.4 Darwin/22.4.0
 - regex: 'UCast/([\d\.]+)'
   name: 'UCast'
-  version: '$1'
-
-# via NPROneAndroid
-# via NPR%20One/371 CFNetwork/1399 Darwin/22.1.0
-- regex: '(?:^NPROneAndroid$|^NPR%20One/([\d\.]+))'
-  name: 'NPR One'
   version: '$1'
 
 # via Trackable/0.1 NNjCeA

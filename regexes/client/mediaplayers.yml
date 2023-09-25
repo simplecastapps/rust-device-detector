@@ -181,11 +181,9 @@
 # pattern missing via amarok/2.8.0 (Phonon/4.7.80; Phonon-GStreamer/4.7.80)
 - regex: '^amarok/(\d+\.[.\d]+)'
   name: 'Amarok'
-  version: 
+  version: '$1'
 
 # via Hubhopper/6.0.5 (Linux;Android 10) ExoPlayerLib/2.16.0
 - regex: 'Hubhopper/([\d\.]+)'
   name: 'Hubhopper'
   version: '$1'
-
-
