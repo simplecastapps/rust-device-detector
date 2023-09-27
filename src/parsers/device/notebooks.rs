@@ -1,19 +1,16 @@
 use anyhow::Result;
 
-use lazy_static::lazy_static;
-
 use super::{Device, DeviceList};
+use once_cell::sync::Lazy;
 
-use crate::parsers::utils::user_agent_match;
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{static_user_agent_match, SafeRegex as Regex};
 
-lazy_static! {
-    static ref DEVICE_LIST: DeviceList = {
-        let contents = std::include_str!("../../../regexes/device/notebooks.yml");
-        DeviceList::from_file(contents).expect("loading notebooks.yml")
-    };
-    static ref NOTEBOOK: LazyRegex = user_agent_match(r#"FBMD/"#);
-}
+static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
+    let contents = std::include_str!("../../../regexes/device/notebooks.yml");
+    DeviceList::from_file(contents).expect("loading notebooks.yml")
+});
+
+static NOTEBOOK: Lazy<Regex> = static_user_agent_match!(r#"FBMD/"#);
 
 pub fn lookup(ua: &str) -> Result<Option<Device>> {
     if !NOTEBOOK.is_match(ua)? {

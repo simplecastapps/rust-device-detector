@@ -4,13 +4,13 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::PathBuf;
 
+use once_cell::sync::Lazy;
+
 use stats_alloc::{Stats, INSTRUMENTED_SYSTEM};
 
 use rust_device_detector::device_detector::DeviceDetector;
 
-lazy_static::lazy_static! {
-    pub(crate) static ref DD: DeviceDetector = DeviceDetector::new();
-}
+pub(crate) static DD: Lazy<DeviceDetector> = Lazy::new(|| DeviceDetector::new());
 
 pub fn memory_test(f: &dyn Fn() -> Result<()>) -> Result<Stats> {
     let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);

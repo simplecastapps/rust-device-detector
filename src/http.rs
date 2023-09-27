@@ -20,10 +20,15 @@ async fn serve_request(
             let body = String::from_utf8(body.to_vec())?;
 
             #[cfg(feature = "cache")]
-            let detection = detector.parse_cached(&body, None).await.expect("detection");
+            let detection = detector.parse_cached(&body, None).await;
 
             #[cfg(not(feature = "cache"))]
-            let detection = detector.parse(&body, None).expect("detection");
+            let detection = detector.parse(&body, None);
+
+
+            let detection = detection.unwrap_or_else(|err| {
+                panic!("error: {:?} ua: {}", &err, &body);
+            });
 
             let response = serde_json::to_string(&detection.to_value())?;
 

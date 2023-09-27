@@ -2,7 +2,6 @@ use anyhow::Result;
 
 use fancy_regex::Regex;
 
-use lazy_static::lazy_static;
 use serde::Deserialize;
 
 use version_compare::Cmp;
@@ -16,13 +15,13 @@ use fallible_iterator::{convert, FallibleIterator};
 use super::{Client, ClientType};
 use crate::client_hints::{ClientHint, ClientHintMapping};
 use crate::known_browsers::AvailableBrowsers;
+
 use crate::parsers::utils::LazyRegex;
 
 pub mod engines;
 
 use once_cell::sync::Lazy;
 
-// TODO FIXME deprecate and remove lazy_static as a dependency.
 static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
     let contents = std::include_str!("../../../regexes/client/browsers.yml");
     BrowserClientList::from_file(contents).expect("loading browsers.yml")
@@ -172,11 +171,9 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                         client.version = None;
 
                         if let Some(browser) = AVAILABLE_BROWSERS.search_by_name(app_name) {
-                            lazy_static! {
-                                static ref BLINK_REGEX: Regex =
-                                    Regex::new(r"Chrome/.+ Safari/537.36")
-                                        .expect("valid blink regex");
-                            }
+                            static BLINK_REGEX: Lazy<Regex> = Lazy::new(|| {
+                                Regex::new(r"Chrome/.+ Safari/537.36").expect("valid blink regex")
+                            });
 
                             if BLINK_REGEX.is_match(ua)? {
                                 client.engine = Some("Blink".to_owned());
@@ -301,11 +298,11 @@ impl BrowserClientList {
         }
 
         if engine == "Gecko" {
-            lazy_static! {
-                static ref GECKO_VERSION: Regex =
-                    Regex::new(r#"(?i:[ ](?:rv[: ]([0-9\.]+)).*gecko/[0-9]{8,10})"#)
-                        .expect("valid browser regex");
-            }
+            static GECKO_VERSION: Lazy<Regex> = Lazy::new(|| {
+                Regex::new(r#"(?i:[ ](?:rv[: ]([0-9\.]+)).*gecko/[0-9]{8,10})"#)
+                    .expect("valid browser regex")
+            });
+
             for m in GECKO_VERSION.captures_iter(ua) {
                 if let Some(r#match) = m?.get(1) {
                     return Ok(Some(r#match.as_str().to_owned()));
@@ -318,12 +315,16 @@ impl BrowserClientList {
             token = "Chrome";
         }
 
-        let mut reg = "(?i:".to_owned();
-        reg.push_str(token);
-        reg.push_str(r#"\s*/?\s*((?=\d+\.\d)\d+[.\d]*|\d{1,7}(?=(?:\D|$)))"#);
-        reg.push(')');
+        use crate::parsers::utils::LimitedUserMatchRegex;
 
-        let reg = Regex::new(&reg).expect("valid browser regex");
+        // There are very few browser engines, like 20 or less, so this
+        // will never get very big, but recompiling the regex every time the
+        // same engines come along is wasteful, so we're just going to share
+        // the compiled regexes amongst threads to ease memory fragmentation.
+        static ENGINE_VERSION_REGEXEN: Lazy<LimitedUserMatchRegex> =
+            Lazy::new(|| LimitedUserMatchRegex::new(40));
+
+        let reg = ENGINE_VERSION_REGEXEN.regex(token);
 
         if let Some(r#match) = reg.captures(ua)? {
             return Ok(Some(

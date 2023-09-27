@@ -1,23 +1,21 @@
 use anyhow::Result;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 use super::{Device, DeviceList};
 
 use super::DeviceType;
-use crate::parsers::utils::user_agent_match;
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{static_user_agent_match, SafeRegex as Regex};
 
-lazy_static! {
-    static ref DEVICE_LIST: DeviceList = {
-        let contents = std::include_str!("../../../regexes/device/televisions.yml");
-        DeviceList::from_file(contents).expect("loading televisions.yml")
-    };
-    static ref HBTV: LazyRegex = user_agent_match(r#"HbbTV/([1-9]{1}(?:\.[0-9]{1}){1,2})"#);
-}
+static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
+    let contents = std::include_str!("../../../regexes/device/televisions.yml");
+    DeviceList::from_file(contents).expect("loading televisions.yml")
+});
+static HBTV: Lazy<Regex> = static_user_agent_match!(r#"HbbTV/([1-9]{1}(?:\.[0-9]{1}){1,2})"#);
 
 pub fn is_hbbtv(ua: &str) -> Result<bool> {
-    HBTV.is_match(ua)
+    let res = HBTV.is_match(ua)?;
+    Ok(res)
 }
 
 pub fn lookup(ua: &str) -> Result<Option<Device>> {

@@ -1,24 +1,23 @@
 use anyhow::Result;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 
 use super::{Device, DeviceList};
 
 use super::DeviceType;
-use crate::parsers::utils::user_agent_match;
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{static_user_agent_match, SafeRegex as Regex};
 
-lazy_static! {
-    static ref DEVICE_LIST: DeviceList = {
-        let contents = std::include_str!("../../../regexes/device/shell_tv.yml");
-        DeviceList::from_file(contents).expect("loading shell_tv.yml")
-    };
-    static ref SHELL_TV: LazyRegex =
-        user_agent_match(r#"[a-z]+[ _]Shell[ _]\w{6}|tclwebkit(\d+[\.\d]*)"#);
-}
+static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
+    let contents = std::include_str!("../../../regexes/device/shell_tv.yml");
+    DeviceList::from_file(contents).expect("loading shell_tv.yml")
+});
+
+static SHELL_TV: Lazy<Regex> =
+    static_user_agent_match!(r#"[a-z]+[ _]Shell[ _]\w{6}|tclwebkit(\d+[\.\d]*)"#);
 
 pub fn is_shell_tv(ua: &str) -> Result<bool> {
-    SHELL_TV.is_match(ua)
+    let res = SHELL_TV.is_match(ua)?;
+    Ok(res)
 }
 
 pub fn lookup(ua: &str) -> Result<Option<Device>> {

@@ -1,33 +1,28 @@
 use anyhow::Result;
 
-use lazy_static::lazy_static;
-
+use once_cell::sync::Lazy;
 use serde_yaml::Value;
 
 use serde::{Deserialize, Serialize};
 
 use crate::client_hints::ClientHint;
 use crate::known_oss::AvailableOSs;
-use crate::parsers::utils::user_agent_match;
+use crate::parsers::utils::{lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex};
 
-use crate::parsers::utils::LazyRegex;
-
-lazy_static! {
-    static ref OS_LIST: OSList = {
-        let contents = std::include_str!("../../regexes/oss.yml");
-        OSList::from_file(contents).expect("loading oss.yml")
-    };
-    static ref CLIENT_HINT_MAPPING: Vec<(String, Vec<String>)> = {
-        [("GNU/Linux", vec!["Linux"]), ("Mac", vec!["MacOS"])]
-            .into_iter()
-            .map(|(k, v)| {
-                let oss = v.into_iter().map(|s| s.to_owned()).collect();
-                (k.to_owned(), oss)
-            })
-            .collect::<Vec<(String, Vec<String>)>>()
-    };
-    static ref AVAILABLE_OSSES: AvailableOSs = AvailableOSs::default();
-}
+static OS_LIST: Lazy<OSList> = Lazy::new(|| {
+    let contents = std::include_str!("../../regexes/oss.yml");
+    OSList::from_file(contents).expect("loading oss.yml")
+});
+static CLIENT_HINT_MAPPING: Lazy<Vec<(String, Vec<String>)>> = Lazy::new(|| {
+    [("GNU/Linux", vec!["Linux"]), ("Mac", vec!["MacOS"])]
+        .into_iter()
+        .map(|(k, v)| {
+            let oss = v.into_iter().map(|s| s.to_owned()).collect();
+            (k.to_owned(), oss)
+        })
+        .collect::<Vec<(String, Vec<String>)>>()
+});
+static AVAILABLE_OSSES: Lazy<AvailableOSs> = Lazy::new(|| AvailableOSs::default());
 
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct OS {
@@ -198,15 +193,13 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
         }
     }
 
-    lazy_static! {
-        static ref ARM_REG: LazyRegex =
-            user_agent_match("arm|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]");
-        static ref MIPS_REG: LazyRegex = user_agent_match("mips");
-        static ref SH4_REG: LazyRegex = user_agent_match("sh4");
-        static ref X64_REG: LazyRegex =
-            user_agent_match("64-?bit|WOW64|(?:Intel)?x64|WINDOWS_64|win64|amd64|x86_?64");
-        static ref X86_REG: LazyRegex = user_agent_match(".+32bit|.+win32|(?:i[0-9]|x)86|i86pc");
-    };
+    static ARM_REG: Lazy<Regex> =
+        static_user_agent_match!("arm|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]");
+    static MIPS_REG: Lazy<Regex> = static_user_agent_match!("mips");
+    static SH4_REG: Lazy<Regex> = static_user_agent_match!("sh4");
+    static X64_REG: Lazy<Regex> =
+        static_user_agent_match!("64-?bit|WOW64|(?:Intel)?x64|WINDOWS_64|win64|amd64|x86_?64");
+    static X86_REG: Lazy<Regex> = static_user_agent_match!(".+32bit|.+win32|(?:i[0-9]|x)86|i86pc");
 
     if ARM_REG.is_match(ua)? {
         return Ok(Some("ARM".into()));
@@ -369,15 +362,15 @@ impl OSList {
                             .regex
                             // either use the regex for this version, or use the top
                             // level regex if there is none.
-                            .map(|x| user_agent_match(&x))
-                            .unwrap_or_else(|| user_agent_match(&self.regex)),
+                            .map(|x| lazy_user_agent_match(&x))
+                            .unwrap_or_else(|| lazy_user_agent_match(&self.regex)),
 
                         version: x.version,
                     })
                     .collect();
 
                 OSEntry {
-                    regex: user_agent_match(&self.regex),
+                    regex: lazy_user_agent_match(&self.regex),
                     name: self.name,
                     version,
                     versions,

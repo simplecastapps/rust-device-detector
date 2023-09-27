@@ -38,10 +38,6 @@
   name: 'Apple TV'
   version: ''
 
-- regex: 'bPod'
-  name: 'bPod'
-  version: ''
-
 # Facebook Audience Network
 - regex: 'AudienceNetworkForAndroid.+(?:FBAV)(?:[ /]([\d\.]+))?'
   name: 'Facebook Audience Network'
@@ -2009,11 +2005,6 @@
 # Podyssey is a community for people that love podcasts. It's like Goodreads, but for podcasts.
 - regex: '(?:Podyssey App|com\.toysinboxes\.Echo|fm\.podyssey\.podcasts|^Podyssey)/?([\d\.]+)?'
   name: 'Podyssey'
-  version: '$1'
-
-# The new generation of Podcast player.
-- regex: 'Procast/?([\d\.]+)?'
-  name: 'ProCast'
   version: '$1'
 
 - regex: '^PugpigBolt (\d+\.[.\d]+)'

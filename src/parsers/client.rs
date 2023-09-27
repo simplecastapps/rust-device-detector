@@ -24,8 +24,7 @@ use serde::{Deserialize, Serialize};
 use serde::de::Deserializer;
 
 use crate::known_browsers::AvailableBrowser;
-use crate::parsers::utils::user_agent_match;
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
 
 pub mod browsers;
 pub mod feed_readers;
@@ -194,5 +193,5 @@ where
     D: Deserializer<'de>,
 {
     let s = String::deserialize(deserializer)?;
-    Ok(user_agent_match(&s))
+    Ok(lazy_user_agent_match(&s))
 }

@@ -1,16 +1,13 @@
 use anyhow::Result;
-use fancy_regex::Regex;
 
 use serde::{Deserialize, Serialize};
 
 use serde_yaml::Value;
 
-use lazy_static::lazy_static;
 use once_cell::sync::Lazy;
 
 use version_compare::{self, Version};
 
-use super::utils::user_agent_match;
 use super::vendor_fragments;
 
 use std::borrow::Cow;
@@ -19,7 +16,7 @@ use crate::client_hints::ClientHint;
 use crate::parsers::client::{Client, ClientType};
 use crate::parsers::oss::OS;
 
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex};
 
 pub mod cameras;
 pub mod car_browsers;
@@ -158,13 +155,13 @@ struct ModelMatchResult {
 //it is hit.
 //pub fn has_desktop_fragment(ua: &str) -> bool {
 //    lazy_static! {
-//        static ref R1: LazyRegex =
-//            user_agent_match(r#"(?:Windows (?:NT|IoT)|X11; Linux x86_64)"#);
-//        static ref R2: LazyRegex = user_agent_match(
+//        static R1: Lazy<Regex> =
+//            static_user_agent_match!(r#"(?:Windows (?:NT|IoT)|X11; Linux x86_64)"#);
+//        static R2: Lazy<Regex> = static_user_agent_match!(
 //            r#" Mozilla/|Andr[o0]id|Tablet|Mobile|iPhone|Windows Phone|ricoh|OculusBrowser"#
 //        );
-//        static ref R3: LazyRegex =
-//            user_agent_match(r#"Lenovo|compatible; MSIE|Trident/|Tesla/|XBOX|FBMD/|ARM; ?([^)]+)"#);
+//        static R3: Lazy<Regex> =
+//            static_user_agent_match!(r#"Lenovo|compatible; MSIE|Trident/|Tesla/|XBOX|FBMD/|ARM; ?([^)]+)"#);
 //    }
 //
 //    R1.is_match(ua).unwrap() || R2.is_match(ua).unwrap() && R3.is_match(ua).unwrap()
@@ -237,9 +234,7 @@ pub fn lookup(
         }
     };
 
-    lazy_static::lazy_static! {
-        static ref TOUCH: LazyRegex = user_agent_match(r#"Touch"#);
-    }
+    static TOUCH: Lazy<Regex> = static_user_agent_match!(r#"Touch"#);
 
     if TOUCH.is_match(&ua)? {
         device.touch_enabled = true;
@@ -276,12 +271,10 @@ pub fn lookup(
         }
 
         if device.device_type.is_none() {
-            lazy_static! {
-                static ref CHROME: LazyRegex = user_agent_match(r#"Chrome/[\.0-9]*"#);
-                static ref SAFARI_PHONE: LazyRegex =
-                    user_agent_match(r#"(?:Mobile|eliboM) Safari/"#);
-                static ref SAFARI_TAB: LazyRegex = user_agent_match(r#"(?!Mobile )Safari"#);
-            };
+            static CHROME: Lazy<Regex> = static_user_agent_match!(r#"Chrome/[\.0-9]*"#);
+            static SAFARI_PHONE: Lazy<Regex> =
+                static_user_agent_match!(r#"(?:Mobile|eliboM) Safari/"#);
+            static SAFARI_TAB: Lazy<Regex> = static_user_agent_match!(r#"(?!Mobile )Safari"#);
             if let Some(family) = &os.family {
                 if family == "Android" && CHROME.is_match(&ua)? {
                     if SAFARI_PHONE.is_match(&ua)? {
@@ -294,12 +287,12 @@ pub fn lookup(
         }
     }
 
-    lazy_static::lazy_static! {
-        static ref APAD_TABLET: LazyRegex = user_agent_match(r#"Pad/APad"#);
-        static ref ANDROID_TABLET: LazyRegex = user_agent_match(r#"Android( [\.0-9]+)?; Tablet;"#);
-        static ref ANDROID_MOBILE: LazyRegex = user_agent_match(r#"Android( [\.0-9]+)?; Mobile;"#);
-        static ref OPERA_TABLET: LazyRegex = user_agent_match(r#"Opera Tablet"#);
-    }
+    static APAD_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Pad/APad"#);
+    static ANDROID_TABLET: Lazy<Regex> =
+        static_user_agent_match!(r#"Android( [\.0-9]+)?; Tablet;"#);
+    static ANDROID_MOBILE: Lazy<Regex> =
+        static_user_agent_match!(r#"Android( [\.0-9]+)?; Mobile;"#);
+    static OPERA_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Opera Tablet"#);
 
     if device.device_type == Some(DeviceType::SmartPhone) && APAD_TABLET.is_match(&ua)? {
         device.device_type = Some(DeviceType::Tablet);
@@ -316,12 +309,10 @@ pub fn lookup(
     }
 
     if let Some(os) = &os_info {
-        lazy_static::lazy_static! {
-            static ref V2: Version<'static> = Version::from("2.0").unwrap();
-            static ref V3: Version<'static> = Version::from("3.0").unwrap();
-            static ref V4: Version<'static> = Version::from("4.0").unwrap();
-            static ref V8: Version<'static> = Version::from("8.0").unwrap();
-        };
+        static V2: Lazy<Version> = Lazy::new(|| Version::from("2.0").unwrap());
+        static V3: Lazy<Version> = Lazy::new(|| Version::from("3.0").unwrap());
+        static V4: Lazy<Version> = Lazy::new(|| Version::from("4.0").unwrap());
+        static V8: Lazy<Version> = Lazy::new(|| Version::from("8.0").unwrap());
 
         if device.device_type.is_none() && os.name == "Android" {
             if let Some(os_version) = os.version.as_ref() {
@@ -364,12 +355,11 @@ pub fn lookup(
         }
     }
 
-    lazy_static::lazy_static! {
-        static ref OPERA: LazyRegex = user_agent_match(r#"Opera TV Store| OMI/"#);
-        static ref ANDR0ID: LazyRegex = user_agent_match(r#"Andr0id|Android TV|\(lite\) TV|BRAVIA"#);
-        static ref TIZEN: LazyRegex = user_agent_match(r#"SmartTV|Tizen.+ TV .+$"#);
-        static ref GENERIC_TV: LazyRegex = user_agent_match(r#"\(TV;"#);
-    };
+    static OPERA: Lazy<Regex> = static_user_agent_match!(r#"Opera TV Store| OMI/"#);
+    static ANDR0ID: Lazy<Regex> =
+        static_user_agent_match!(r#"Andr0id|Android TV|\(lite\) TV|BRAVIA"#);
+    static TIZEN: Lazy<Regex> = static_user_agent_match!(r#"SmartTV|Tizen.+ TV .+$"#);
+    static GENERIC_TV: Lazy<Regex> = static_user_agent_match!(r#"\(TV;"#);
 
     if OPERA.is_match(&ua)? {
         device.device_type = Some(DeviceType::Television);
@@ -402,9 +392,8 @@ pub fn lookup(
         }
     }
 
-    lazy_static::lazy_static! {
-        static ref DESKTOP_FRAGMENT: LazyRegex = user_agent_match(r#"Desktop (x(?:32|64)|WOW64);"#);
-    }
+    static DESKTOP_FRAGMENT: Lazy<Regex> =
+        static_user_agent_match!(r#"Desktop (x(?:32|64)|WOW64);"#);
 
     if let Some(device_type) = &device.device_type {
         if *device_type != DeviceType::Desktop
@@ -459,9 +448,7 @@ pub(crate) fn uses_mobile_browser(client: &Client) -> bool {
 }
 
 fn is_touch(ua: &str) -> Result<bool> {
-    lazy_static::lazy_static! {
-        static ref TOUCH: LazyRegex = user_agent_match(r#"Touch"#);
-    };
+    static TOUCH: Lazy<Regex> = static_user_agent_match!(r#"Touch"#);
 
     let res = TOUCH.is_match(ua)?;
     Ok(res)
@@ -471,9 +458,7 @@ impl DeviceList {
     fn lookup(&self, ua: &str, _type: &str) -> Result<Option<Device>> {
         for (name, device) in self.devices.iter() {
             if let Some(match_result) = device.lookup(ua)? {
-                lazy_static! {
-                    static ref TD: Regex = Regex::new(r#" [Tt][Dd]$"#).unwrap();
-                };
+                static TD: Lazy<Regex> = Lazy::new(|| Regex::new(r#" [Tt][Dd]$"#).unwrap());
 
                 let mut model: Option<String> =
                     match match_result.model.as_ref().map(|x| x.model.as_str()) {
@@ -539,7 +524,7 @@ impl DeviceList {
         impl Into<ModelEntry> for YamlModelEntry {
             fn into(self) -> ModelEntry {
                 ModelEntry {
-                    regex: self.regex.map(|x| user_agent_match(&x)),
+                    regex: self.regex.map(|x| lazy_user_agent_match(&x)),
                     device: self.device.map(|device| DeviceType::from_str(&device)),
                     model: self.model,
                     brand: self.brand,
@@ -569,7 +554,7 @@ impl DeviceList {
                 models.extend(self.models.into_iter().map(|x| x.into()));
 
                 DeviceEntry {
-                    regex: user_agent_match(&self.regex),
+                    regex: lazy_user_agent_match(&self.regex),
                     device: self.device,
                     models,
                 }
@@ -700,13 +685,11 @@ fn model_match(model: &ModelEntry, ua: &str) -> Result<Option<ModelMatchResult>>
             }
             _ => None,
         },
-        None => {
-            Some(ModelMatchResult {
-                model: model.model.clone(),
-                device: model.device.as_ref().map(|x| x.to_owned()),
-                brand: None,
-            })
-        }
+        None => Some(ModelMatchResult {
+            model: model.model.clone(),
+            device: model.device.as_ref().map(|x| x.to_owned()),
+            brand: None,
+        }),
     };
 
     Ok(res)

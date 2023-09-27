@@ -1,11 +1,10 @@
 use anyhow::Result;
 use serde::Deserialize;
 
-use lazy_static::lazy_static;
-
+use once_cell::sync::Lazy;
 use std::collections::HashMap;
 
-use super::utils::user_agent_match;
+use super::utils::lazy_user_agent_match;
 use crate::parsers::utils::LazyRegex;
 
 #[derive(Debug)]
@@ -14,12 +13,10 @@ struct VendorFragments {
     fragments: Vec<LazyRegex>,
 }
 
-lazy_static! {
-    static ref FRAGMENT_LIST: VendorFragmentList = {
-        let contents = include_str!("../../regexes/vendorfragments.yml");
-        VendorFragmentList::from_file(contents).expect("loading vendorfragments.yml")
-    };
-}
+static FRAGMENT_LIST: Lazy<VendorFragmentList> = Lazy::new(|| {
+    let contents = include_str!("../../regexes/vendorfragments.yml");
+    VendorFragmentList::from_file(contents).expect("loading vendorfragments.yml")
+});
 
 pub fn lookup(ua: &str) -> Result<Option<&str>> {
     FRAGMENT_LIST.lookup(ua)
@@ -70,7 +67,7 @@ impl VendorFragmentList {
                             .iter()
                             .map(|x| {
                                 let x = x.to_owned() + "[^a-z0-9]+";
-                                user_agent_match(&x)
+                                lazy_user_agent_match(&x)
                             })
                             .collect(),
                     })

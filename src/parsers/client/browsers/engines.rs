@@ -1,41 +1,36 @@
 use anyhow::Result;
 use serde::Deserialize;
 
-use lazy_static::lazy_static;
+use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
+use once_cell::sync::Lazy;
 
-use crate::parsers::utils::user_agent_match;
+static ENGINE_LIST: Lazy<BrowserEngineList> = Lazy::new(|| {
+    let contents = std::include_str!("../../../../regexes/client/browser_engine.yml");
+    BrowserEngineList::from_file(contents).expect("loading browser_engine.yml")
+});
 
-use crate::parsers::utils::LazyRegex;
-
-lazy_static! {
-    static ref ENGINE_LIST: BrowserEngineList = {
-        let contents = std::include_str!("../../../../regexes/client/browser_engine.yml");
-        BrowserEngineList::from_file(contents).expect("loading browser_engine.yml")
-    };
-
-    static ref AVAILABLE_ENGINES: Vec<String> = {
-        // hard coded list taken from matamoto device detector
-        let engines = [
-            "WebKit",
-            "Blink",
-            "Trident",
-            "Text-based",
-            "Dillo",
-            "iCab",
-            "Elektra",
-            "Presto",
-            "Gecko",
-            "KHTML",
-            "NetFront",
-            "Edge",
-            "NetSurf",
-            "Servo",
-            "Goanna",
-            "EkiohFlow"
-        ];
-        engines.into_iter().map(|x| x.to_owned()).collect()
-    };
-}
+static AVAILABLE_ENGINES: Lazy<Vec<String>> = Lazy::new(|| {
+    // hard coded list taken from matamoto device detector
+    let engines = [
+        "WebKit",
+        "Blink",
+        "Trident",
+        "Text-based",
+        "Dillo",
+        "iCab",
+        "Elektra",
+        "Presto",
+        "Gecko",
+        "KHTML",
+        "NetFront",
+        "Edge",
+        "NetSurf",
+        "Servo",
+        "Goanna",
+        "EkiohFlow",
+    ];
+    engines.into_iter().map(|x| x.to_owned()).collect()
+});
 
 pub fn lookup(name: &str) -> Result<Option<String>> {
     // println!("browser engine lookup {}", name);
@@ -95,7 +90,7 @@ impl BrowserEngineList {
         #[allow(clippy::from_over_into)]
         impl Into<BrowserEngine> for YamlBrowserEngine {
             fn into(self) -> BrowserEngine {
-                let regex = user_agent_match(&self.regex);
+                let regex = lazy_user_agent_match(&self.regex);
 
                 BrowserEngine {
                     name: self.name,

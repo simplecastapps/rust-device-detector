@@ -1,5 +1,8 @@
 use anyhow::Result;
-use fancy_regex::Regex;
+
+use once_cell::sync::Lazy;
+
+use crate::parsers::utils::SafeRegex as Regex;
 
 pub struct ClientHintMapping {
     mappings: Vec<(String, Vec<String>)>,
@@ -59,9 +62,8 @@ impl ClientHint {
 
         let mut full_version_list: Vec<(String, String)> = Vec::new();
 
-        lazy_static::lazy_static! {
-            static ref BRAND_REGEX: Regex = Regex::new(r#""([^"]+)"; ?v="([^"]+)"?"#).unwrap();
-        }
+        static BRAND_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new(r#""([^"]+)"; ?v="([^"]+)"?"#).unwrap());
 
         // println!("headers: {:?}", headers);
         for (header, value) in headers {

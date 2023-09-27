@@ -76,10 +76,12 @@ struct Args {
 // use stats_alloc::{Region, StatsAlloc, INSTRUMENTED_SYSTEM};
 
 // #[global_allocator]
+// static ALLOC: dhat::Alloc = dhat::Alloc;
 // static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 #[tokio::main]
 async fn main() -> Result<(), ExitCode> {
+    // let _profiler = dhat::Profiler::new_heap();
     //    sc_core::setup::binary_setup();
 
     // let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
@@ -115,6 +117,7 @@ async fn main() -> Result<(), ExitCode> {
             if args.gen_test_case {
                 println!("{}", detection.to_test_case(&ua));
             } else {
+                // println!("user_agent: {}", &ua);
                 println!("{}", detection.to_value());
             }
 
@@ -125,10 +128,7 @@ async fn main() -> Result<(), ExitCode> {
         let ip: IpAddr = args.ip.parse().expect("valid ip address (ipv4 or ipv6)");
         let sock = SocketAddr::new(ip, args.port);
 
-        // tokio::spawn(async move {
-        // let reg: Region<'static, System> = Region::new(&GLOBAL);
         server(sock, detector).await;
-        // }).await;
     } else {
         match args.useragent {
             None => {
@@ -144,11 +144,11 @@ async fn main() -> Result<(), ExitCode> {
                 let detection = detector
                     .parse_cached(&ua, headers)
                     .await
-                    .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
+                    .unwrap_or_else(|err| panic!("parse failed {} for '{}'", err, &ua));
                 #[cfg(not(feature = "cache"))]
                 let detection = detector
                     .parse(&ua, headers)
-                    .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
+                    .unwrap_or_else(|err| panic!("parse failed {} for '{}'", err, &ua));
 
                 if args.gen_test_case {
                     println!("{}", detection.to_test_case(&ua));

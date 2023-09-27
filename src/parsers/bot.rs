@@ -2,18 +2,15 @@ use anyhow::Result;
 
 use serde::Deserialize;
 
-use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use serde::Serialize;
 
-use crate::parsers::utils::user_agent_match;
-use crate::parsers::utils::LazyRegex;
+use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
 
-lazy_static! {
-    static ref BOT_LIST: BotList = {
-        let contents = include_str!("../../regexes/bots.yml");
-        BotList::from_file(contents).unwrap_or_else(|_| panic!("loading bots.yml"))
-    };
-}
+static BOT_LIST: Lazy<BotList> = Lazy::new(|| {
+    let contents = include_str!("../../regexes/bots.yml");
+    BotList::from_file(contents).unwrap_or_else(|_| panic!("loading bots.yml"))
+});
 
 pub fn lookup_bot(ua: &str) -> Result<Option<Bot>> {
     BOT_LIST.lookup(ua)
@@ -82,7 +79,7 @@ impl BotList {
                 }
 
                 BotEntry {
-                    regex: user_agent_match(&self.regex),
+                    regex: lazy_user_agent_match(&self.regex),
                     name: self.name,
                     url: self.url,
                     category: self.category,
