@@ -14,7 +14,7 @@ struct VendorFragments {
 }
 
 static FRAGMENT_LIST: Lazy<VendorFragmentList> = Lazy::new(|| {
-    let contents = include_str!("../../regexes/vendorfragments.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/vendorfragments.yml"));
     VendorFragmentList::from_file(contents).expect("loading vendorfragments.yml")
 });
 

@@ -5,7 +5,7 @@ use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
 use once_cell::sync::Lazy;
 
 static ENGINE_LIST: Lazy<BrowserEngineList> = Lazy::new(|| {
-    let contents = std::include_str!("../../../../regexes/client/browser_engine.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/browser_engine.yml"));
     BrowserEngineList::from_file(contents).expect("loading browser_engine.yml")
 });
 

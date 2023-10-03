@@ -23,7 +23,7 @@ pub mod engines;
 use once_cell::sync::Lazy;
 
 static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
-    let contents = std::include_str!("../../../regexes/client/browsers.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/browsers.yml"));
     BrowserClientList::from_file(contents).expect("loading browsers.yml")
 });
 

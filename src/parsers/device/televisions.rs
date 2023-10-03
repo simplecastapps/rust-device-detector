@@ -8,7 +8,7 @@ use super::DeviceType;
 use crate::parsers::utils::{static_user_agent_match, SafeRegex as Regex};
 
 static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
-    let contents = std::include_str!("../../../regexes/device/televisions.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/device/televisions.yml"));
     DeviceList::from_file(contents).expect("loading televisions.yml")
 });
 static HBTV: Lazy<Regex> = static_user_agent_match!(r#"HbbTV/([1-9]{1}(?:\.[0-9]{1}){1,2})"#);

@@ -4,7 +4,7 @@ use super::{Device, DeviceList};
 use once_cell::sync::Lazy;
 
 static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
-    let contents = std::include_str!("../../../regexes/device/cameras.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/device/cameras.yml"));
     DeviceList::from_file(contents).expect("loading cameras.yml")
 });
 

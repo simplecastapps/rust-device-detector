@@ -4,7 +4,7 @@ use super::{Client, ClientList};
 use once_cell::sync::Lazy;
 
 static CLIENT_LIST: Lazy<ClientList> = Lazy::new(|| {
-    let contents = std::include_str!("../../../regexes/client/pim.yml");
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/pim.yml"));
     ClientList::from_file(contents).expect("loading pim.yml")
 });
 
