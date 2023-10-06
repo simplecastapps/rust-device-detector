@@ -28,7 +28,7 @@ defmodule Load do
   * timeout - how long to wait for each response (default: 30_000 (ms))
   """
   def test(file, opts \\ []) do
-    max_concurrency = opts[:max_concurrency] || 100
+    max_concurrency = opts[:max_concurrency] || 50
     timeout = opts[:timeout] || 30_000
 
     File.stat(file)
@@ -65,7 +65,7 @@ defmodule Load do
       |> Stream.drop(drop)
       |> Stream.take(cases)
 
-    IO.puts("Running #{cases} cases")
+    IO.puts("Running #{cases} cases (take: #{cases}, drop: #{drop})")
 
     bench(
       fn ->
@@ -85,13 +85,16 @@ defmodule Load do
     verbose = opts[:verbose] || false
     verbose_input = opts[:verbose] || opts[:verbose_input] || false
     verbose_output = opts[:verbose] || opts[:verbose_output] || false
+
+    host = opts[:host] || "localhost"
+
     port = opts[:port] || 8080
 
     if verbose_input do
       "useragent '#{str}'" |> IO.puts()
     end
 
-    HTTPoison.post("http://localhost:#{port}/detect", str, [], http_opts(opts))
+    HTTPoison.post("http://#{host}:#{port}/detect", str, [], http_opts(opts))
     |> then(fn
       {:ok, %HTTPoison.Response{status_code: 200, body: b}} ->
         b
