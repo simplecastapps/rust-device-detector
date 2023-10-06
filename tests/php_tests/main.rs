@@ -4,6 +4,6 @@
 //static GLOBAL: &StatsAlloc<System> = &INSTRUMENTED_SYSTEM;
 
 mod bots;
-mod non_bots;
+mod fixtures;
 mod parser;
 mod utils;
