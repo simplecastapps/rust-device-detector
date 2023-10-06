@@ -1,107 +1,52 @@
 use anyhow::Result;
 use serde_yaml::Value;
 
-use std::fs::File;
-use std::io::BufReader;
-
 use crate::utils;
-
-use std::path::PathBuf;
 
 use rust_device_detector::device_detector::Detection;
 
-use seq_macro::seq;
+use test_each_file::test_each_file;
 
-// the number of base files, not counting bots.yml. If a new files is added, tests
-// will fail until you update these two numbers. Could probably improve this with proc macros.
-const NUM_FILES: usize = 71;
-
-seq!(N in 001..=69 {
-    #[test]
-    // #[serial_test::serial]
-    fn test_non_bots_~N() -> Result<()> {
-        test_some_files(N)?;
-        Ok(())
-    }
-});
-
-#[test]
-// Ensure we are testing every file that exists.
-fn no_missing_files() -> Result<()> {
-    assert!(
-        non_bot_files()?
-            .into_iter()
-            .skip(NUM_FILES)
-            .collect::<Vec<_>>()
-            .is_empty(),
-        "INCREMENT NUM_FILES!"
-    );
-
-    Ok(())
-}
+test_each_file! { in "./tests/data/fixtures/" => base_fixture_tests }
 
 // #[test]
-#[allow(dead_code)]
-fn repeat_memory_tests() -> Result<()> {
-    use stats_alloc::INSTRUMENTED_SYSTEM;
-    let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
+//#[allow(dead_code)]
+//fn repeat_memory_tests() -> Result<()> {
+//    use stats_alloc::INSTRUMENTED_SYSTEM;
+//    let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
+//
+//    for r in [1..10, 1..10, 1..12, 1..12, 5..13, 1..13] {
+//        println!("range {:?}", r);
+//
+//        // this will cause allocations (500M or so)
+//        let mch = utils::memory_test(&|| {
+//            for i in r.clone().into_iter() {
+//                test_some_files(i)?;
+//            }
+//            Ok(())
+//        })?;
+//
+//        let ch = reg.change();
+//
+//        println!("run: stats {:?}", &mch);
+//
+//        println!("global: stats {:?}", &ch);
+//    }
+//
+//    Ok(())
+//}
+//
+fn base_fixture_tests(file_path: &str, contents: &str) {
+    let mut cases: Value = serde_yaml::from_str(contents).expect("valid test yaml");
 
-    for r in [1..10, 1..10, 1..12, 1..12, 5..13, 1..13] {
-        println!("range {:?}", r);
+    let cases = cases.as_sequence_mut().expect("sequence");
 
-        // this will cause allocations (500M or so)
-        let mch = utils::memory_test(&|| {
-            for i in r.clone().into_iter() {
-                test_some_files(i)?;
-            }
-            Ok(())
-        })?;
-
-        let ch = reg.change();
-
-        println!("run: stats {:?}", &mch);
-
-        println!("global: stats {:?}", &ch);
+    for (i, case) in cases.into_iter().enumerate() {
+        basic(file_path, i + 1, case).expect("basic test");
     }
-
-    Ok(())
 }
 
-fn non_bot_files() -> Result<Vec<PathBuf>> {
-    let res = utils::file_paths("tests/data/fixtures/*.yml")?
-        .into_iter()
-        .filter(|file| !file.as_path().ends_with("bots.yml"))
-        .collect::<Vec<_>>();
-
-    Ok(res)
-}
-
-fn test_some_files(test_index: usize) -> Result<()> {
-    let offset = test_index;
-
-    let files = non_bot_files()?
-        .into_iter()
-        .skip(offset - 1)
-        .take(1)
-        .map(|x| (x.clone(), BufReader::new(File::open(x).expect("file"))))
-        .collect::<Vec<_>>();
-
-    assert!(!files.is_empty(), "there should be at least one file!");
-
-    for (path, file) in files.into_iter() {
-        let mut cases: Value = serde_yaml::from_reader(file)?;
-        let cases = cases.as_sequence_mut().expect("sequence");
-
-        for (i, case) in cases.into_iter().enumerate() {
-            basic(path.as_os_str(), i + 1, case).expect("basic test");
-        }
-    }
-
-    Ok(())
-}
-
-use std::ffi::OsStr;
-fn basic(file_path: &OsStr, idx: usize, value: &Value) -> Result<()> {
+fn basic(test_file: &str, idx: usize, value: &Value) -> Result<()> {
     if value
         .as_mapping()
         .map(|m| m.contains_key("bot"))
@@ -109,19 +54,19 @@ fn basic(file_path: &OsStr, idx: usize, value: &Value) -> Result<()> {
     {
         crate::bots::basic(idx, value)?;
     } else {
-        basic_known(file_path, idx, value)?;
+        basic_known(test_file, idx, value)?;
     }
 
     Ok(())
 }
 
-fn basic_known(file_path: &OsStr, idx: usize, value: &Value) -> Result<()> {
+fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
     let dd = &utils::DD;
 
     let ua = value["user_agent"].as_str().unwrap_or_else(|| {
         panic!(
             "missing user_agent, file: {}, case: {}",
-            file_path.to_string_lossy(),
+            file_path,
             idx
         )
     });
@@ -151,7 +96,7 @@ fn basic_known(file_path: &OsStr, idx: usize, value: &Value) -> Result<()> {
 }
 
 fn basic_client(
-    file_path: &OsStr,
+    file_path: &str,
     idx: usize,
     ua: &str,
     value: &Value,
@@ -165,7 +110,7 @@ fn basic_client(
         assert!(
             dd_res.client.is_none(),
             "client non null file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-            file_path.to_string_lossy(),
+            file_path,
             idx,
             dd_res.client,
             test_client,
@@ -183,7 +128,7 @@ fn basic_client(
     assert!(
         test_client_type == dd_client_type,
         "client type test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_client_type,
         test_client_type,
@@ -196,7 +141,7 @@ fn basic_client(
     assert!(
         test_name == dd_name,
         "client name test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_name,
         test_name,
@@ -218,7 +163,7 @@ fn basic_client(
     assert!(
         test_version == dd_version,
         "client version test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_version,
         test_version,
@@ -240,7 +185,7 @@ fn basic_client(
     assert!(
         test_engine == dd_engine,
         "client engine test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_engine,
         test_engine,
@@ -263,7 +208,7 @@ fn basic_client(
                 .as_ref()
                 .and_then(|client| client.engine_version.as_deref()),
         "client engine version test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_res
             .client
@@ -277,7 +222,7 @@ fn basic_client(
 }
 
 fn basic_device(
-    file_path: &OsStr,
+    file_path: &str,
     idx: usize,
     ua: &str,
     value: &Value,
@@ -291,7 +236,7 @@ fn basic_device(
         assert!(
             dd_res.client.is_none(),
             "client non null file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-            file_path.to_string_lossy(),
+            file_path,
             idx,
             dd_res.client,
             test_device,
@@ -317,7 +262,7 @@ fn basic_device(
     assert!(
         test_type == dd_type,
         "device type test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_type,
         test_type,
@@ -339,7 +284,7 @@ fn basic_device(
     assert!(
         test_brand == dd_brand,
         "device brand test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_brand,
         test_brand,
@@ -361,7 +306,7 @@ fn basic_device(
     assert!(
         test_model == dd_model,
         "device model test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_model,
         test_model,
@@ -372,7 +317,7 @@ fn basic_device(
 }
 
 fn basic_os(
-    file_path: &OsStr,
+    file_path: &str,
     idx: usize,
     ua: &str,
     value: &Value,
@@ -386,7 +331,7 @@ fn basic_os(
         assert!(
             dd_res.os.is_none(),
             "os non null file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-            file_path.to_string_lossy(),
+            file_path,
             idx,
             dd_res.client,
             test_os,
@@ -402,7 +347,7 @@ fn basic_os(
     assert!(
         test_name == dd_name,
         "os name test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_name,
         test_name,
@@ -430,7 +375,7 @@ fn basic_os(
     assert!(
         test_version == dd_version,
         "os version test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_version,
         test_version,
@@ -453,7 +398,7 @@ fn basic_os(
     assert!(
         test_platform == dd_platform,
         "os platform test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_platform,
         test_platform,
@@ -476,7 +421,7 @@ fn basic_os(
     assert!(
         test_family == dd_family,
         "os family test file: {}, case: {}\n code: {:?}\n test: {:?}\n ua: {}",
-        file_path.to_string_lossy(),
+        file_path,
         idx,
         dd_family,
         test_family,

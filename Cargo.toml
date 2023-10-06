@@ -26,8 +26,9 @@ const_format = "0.2"
 stats_alloc = "0.1.1"
 futures = "0.3"
 glob = "0.3"
-seq-macro = "0.3"
-serial_test = "2.0.0"
+
+# proc macro to iterate over yml files in tests, has to be own crate.
+test_each_file = { path = "test_each_file" }
 
 [features]
 default = []

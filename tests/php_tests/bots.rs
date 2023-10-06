@@ -3,24 +3,6 @@ use serde_yaml::Value;
 
 use crate::utils;
 
-#[test]
-fn test_parser_bots() -> Result<()> {
-    let files = utils::files("tests/data/fixtures/bots.yml")?;
-
-    assert!(!files.is_empty(), "expected at least one file");
-
-    for file in files.into_iter() {
-        let mut cases: Value = serde_yaml::from_reader(file)?;
-        let cases = cases.as_sequence_mut().expect("sequence");
-
-        for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
-        }
-    }
-
-    Ok(())
-}
-
 pub(crate) fn basic(idx: usize, value: &Value) -> Result<()> {
     let ua = value["user_agent"].as_str().expect("user_agent");
     let test_bot = value["bot"].as_mapping().expect("bot");
