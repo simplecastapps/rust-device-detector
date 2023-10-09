@@ -2170,8 +2170,13 @@
   name: 'L.A. Times'
   version: ''
 
-- regex: '(?:NYT ?Audio|nytios)/([\d.]+)'
+# nyt has a couple apps
+- regex: 'nytios/([\d.]+)'
   name: 'NYTimes'
+  version: '$1'
+
+- regex: '^NYT(?: |%20)?Audio/([\d.]+)'
+  name: 'NYT Audio'
   version: '$1'
 
 - regex: '^LiSTNR(?:[.\w]+)?/([\d.]+)'
