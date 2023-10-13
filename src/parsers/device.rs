@@ -16,7 +16,9 @@ use crate::client_hints::ClientHint;
 use crate::parsers::client::{Client, ClientType};
 use crate::parsers::oss::OS;
 
-use crate::parsers::utils::{lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex};
+use crate::parsers::utils::{
+    lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex,
+};
 
 pub mod cameras;
 pub mod car_browsers;
@@ -386,10 +388,9 @@ pub fn lookup(
         }
     }
 
-    if device.device_type.is_none() {
-        if GENERIC_TV.is_match(&ua)? {
+    if device.device_type.is_none() &&
+        GENERIC_TV.is_match(&ua)? {
             device.device_type = Some(DeviceType::Television);
-        }
     }
 
     static DESKTOP_FRAGMENT: Lazy<Regex> =

@@ -63,13 +63,9 @@ fn basic(test_file: &str, idx: usize, value: &Value) -> Result<()> {
 fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
     let dd = &utils::DD;
 
-    let ua = value["user_agent"].as_str().unwrap_or_else(|| {
-        panic!(
-            "missing user_agent, file: {}, case: {}",
-            file_path,
-            idx
-        )
-    });
+    let ua = value["user_agent"]
+        .as_str()
+        .unwrap_or_else(|| panic!("missing user_agent, file: {}, case: {}", file_path, idx));
 
     let headers: Option<Vec<(String, String)>> = value
         .get("headers")

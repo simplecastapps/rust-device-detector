@@ -6,7 +6,6 @@ use std::path::PathBuf;
 
 use once_cell::sync::Lazy;
 
-
 use rust_device_detector::device_detector::DeviceDetector;
 
 pub(crate) static DD: Lazy<DeviceDetector> = Lazy::new(|| DeviceDetector::new());
@@ -15,10 +14,10 @@ pub(crate) static DD: Lazy<DeviceDetector> = Lazy::new(|| DeviceDetector::new())
 // pub fn memory_test(f: &dyn Fn() -> Result<()>) -> Result<Stats> {
 //     let reg = stats_alloc::Region::new(&INSTRUMENTED_SYSTEM);
 //     f()?;
-// 
+//
 //     // difference in memory before and after function runs.
 //     let ch = reg.change();
-// 
+//
 //     Ok(ch)
 // }
 

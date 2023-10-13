@@ -8,14 +8,16 @@ use crate::parsers::device::DeviceType;
 use crate::parsers::{bot, client, device, oss};
 
 #[cfg(feature = "cache")]
-use moka::future::Cache;
+use moka::sync::Cache;
+
+pub use bot::Bot;
 
 // TODO we should Box KnownDevice as it is much larger than Bot
 #[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone)]
 pub enum Detection {
     Known(KnownDevice),
-    Bot(bot::Bot),
+    Bot(Bot),
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -25,8 +27,9 @@ pub struct KnownDevice {
     pub os: Option<oss::OS>,
 }
 
+
 impl Detection {
-    pub fn get_bot(&self) -> Option<&bot::Bot> {
+    pub fn get_bot(&self) -> Option<&Bot> {
         match self {
             Self::Bot(bot) => Some(bot),
             _ => None,
@@ -42,10 +45,7 @@ impl Detection {
 
     /// Did we detect a bot? If not, then it is a known device.
     pub fn is_bot(&self) -> bool {
-        match self {
-            Self::Bot(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Bot(_))
     }
     /// This is purely to aid in generating test cases, you should not rely on this for
     /// actual production usage. Only useful for normal stuff, not bots, etc.
@@ -85,6 +85,7 @@ impl Detection {
             .and_then(|x| x.as_str())
             .unwrap_or("\"\"");
 
+        #[allow(clippy::comparison_to_empty)]
         let os = if os_name == "\"\"" && os_version == "" && os_platform == "\"\"" {
             "os: []".to_owned()
         } else {
@@ -125,6 +126,7 @@ impl Detection {
             .and_then(|x| x.as_str())
             .unwrap_or("");
 
+        #[allow(clippy::comparison_to_empty)]
         let client = if client_type == "\"\""
             && client_name == "\"\""
             && client_version == ""
@@ -162,11 +164,11 @@ impl Detection {
             val.get("device")
                 .and_then(|x| x.get("type"))
                 .and_then(|x| x.as_str())
-                .and_then(|x| {
+                .map(|x| {
                     if x == "television" {
-                        Some("tv")
+                        "tv"
                     } else {
-                        Some(x)
+                        x
                     }
                 })
                 .unwrap_or("\"\""),
@@ -178,7 +180,7 @@ impl Detection {
                 .and_then(|x| x.get("model"))
                 .and_then(|x| x.as_str())
                 .and_then(|x| {
-                    if x == "" {
+                    if x.is_empty() {
                         None
                     } else {
                         Some(x)
@@ -569,7 +571,7 @@ impl DeviceDetector {
     }
 
     #[cfg(feature = "cache")]
-    pub async fn parse_cached(
+    pub fn parse_cached(
         &self,
         ua: &str,
         headers: Option<Vec<(String, String)>>,
@@ -584,7 +586,7 @@ impl DeviceDetector {
 
         let known = self.parse(ua, headers.clone())?;
 
-        self.cache.insert(ua.to_owned(), known.clone()).await;
+        self.cache.insert(ua.to_owned(), known.clone());
 
         Ok(known)
     }

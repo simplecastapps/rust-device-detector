@@ -85,7 +85,7 @@ impl ClientHint {
 
                 "http-sec-ch-ua-model" | "sec-ch-ua-model" | "model" => {
                     let value = value.trim_matches('"');
-                    if value != "" {
+                    if !value.is_empty() {
                         model = Some(value.to_owned());
                     }
                 }

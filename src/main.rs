@@ -104,14 +104,8 @@ async fn main() -> Result<(), ExitCode> {
         while std::io::stdin().read_line(&mut ua).unwrap() > 0 {
             let headers = None;
 
-            #[cfg(feature = "cache")]
             let detection = detector
-                .parse_cached(&ua.trim_end(), headers)
-                .await
-                .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
-            #[cfg(not(feature = "cache"))]
-            let detection = detector
-                .parse(&ua.trim_end(), headers)
+                .parse(ua.trim_end(), headers)
                 .unwrap_or_else(|_| panic!("parse failed for {}", &ua));
 
             if args.gen_test_case {
@@ -140,12 +134,6 @@ async fn main() -> Result<(), ExitCode> {
                 // eprintln!("ua: {}", ua);
                 let headers = None;
 
-                #[cfg(feature = "cache")]
-                let detection = detector
-                    .parse_cached(&ua, headers)
-                    .await
-                    .unwrap_or_else(|err| panic!("parse failed {} for '{}'", err, &ua));
-                #[cfg(not(feature = "cache"))]
                 let detection = detector
                     .parse(&ua, headers)
                     .unwrap_or_else(|err| panic!("parse failed {} for '{}'", err, &ua));

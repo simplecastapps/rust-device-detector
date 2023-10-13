@@ -23,7 +23,10 @@ pub mod engines;
 use once_cell::sync::Lazy;
 
 static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/browsers.yml"));
+    let contents = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/regexes/client/browsers.yml"
+    ));
     BrowserClientList::from_file(contents).expect("loading browsers.yml")
 });
 
@@ -34,7 +37,7 @@ static CLIENT_HINT_MAPPING: Lazy<ClientHintMapping> = Lazy::new(|| {
     )])
 });
 
-static AVAILABLE_BROWSERS: Lazy<AvailableBrowsers> = Lazy::new(|| AvailableBrowsers::default());
+static AVAILABLE_BROWSERS: Lazy<AvailableBrowsers> = Lazy::new(AvailableBrowsers::default);
 
 pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Client>> {
     let client_from_ua: Option<Client> = CLIENT_LIST.lookup(ua)?;
@@ -64,7 +67,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
 
             let res = Client {
                 name: brand_result.name.clone(),
-                version: version,
+                version,
                 r#type: ClientType::Browser,
                 engine: None,
                 engine_version: None,
@@ -147,7 +150,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                 if let Some(client_version) = &client.version {
                     if let Some(client_from_hints_version) = &client_from_hints.version {
                         if client_version.starts_with(client_from_hints_version) {
-                            if version_compare::compare(&client_from_hints_version, &client_version)
+                            if version_compare::compare(client_from_hints_version, client_version)
                                 .unwrap_or(Cmp::Eq)
                                 == Cmp::Lt
                             {
@@ -280,7 +283,7 @@ impl BrowserClientList {
 
                 return Ok(Some(Client {
                     name,
-                    version: version,
+                    version,
                     r#type: ClientType::Browser,
                     engine,
                     engine_version,

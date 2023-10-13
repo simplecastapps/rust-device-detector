@@ -8,7 +8,7 @@ use serde::Serialize;
 use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
 
 static BOT_LIST: Lazy<BotList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/bots.yml"));
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/regexes/bots.yml"));
     BotList::from_file(contents).unwrap_or_else(|_| panic!("loading bots.yml"))
 });
 

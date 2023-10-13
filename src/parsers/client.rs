@@ -36,6 +36,7 @@ pub mod pim;
 
 use crate::client_hints::ClientHint;
 
+#[repr(C)]
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub enum ClientType {
     #[serde(rename = "browser")]
@@ -135,7 +136,7 @@ impl ClientList {
                     version
                 };
 
-                let version = if version != "" { Some(version) } else { None };
+                let version = if version.is_empty() { Some(version) } else { None };
 
                 caps.expand(&client.name, &mut name);
 

@@ -7,10 +7,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::client_hints::ClientHint;
 use crate::known_oss::AvailableOSs;
-use crate::parsers::utils::{lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex};
+use crate::parsers::utils::{
+    lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex,
+};
 
 static OS_LIST: Lazy<OSList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/oss.yml"));
+    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/regexes/oss.yml"));
     OSList::from_file(contents).expect("loading oss.yml")
 });
 static CLIENT_HINT_MAPPING: Lazy<Vec<(String, Vec<String>)>> = Lazy::new(|| {
@@ -22,7 +24,7 @@ static CLIENT_HINT_MAPPING: Lazy<Vec<(String, Vec<String>)>> = Lazy::new(|| {
         })
         .collect::<Vec<(String, Vec<String>)>>()
 });
-static AVAILABLE_OSSES: Lazy<AvailableOSs> = Lazy::new(|| AvailableOSs::default());
+static AVAILABLE_OSSES: Lazy<AvailableOSs> = Lazy::new(AvailableOSs::default);
 
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct OS {

@@ -20,11 +20,10 @@ async fn serve_request(
             let body = String::from_utf8(body.to_vec())?;
 
             #[cfg(feature = "cache")]
-            let detection = detector.parse_cached(&body, None).await;
+            let detection = detector.parse_cached(&body, None);
 
             #[cfg(not(feature = "cache"))]
             let detection = detector.parse(&body, None);
-
 
             let detection = detection.unwrap_or_else(|err| {
                 panic!("error: {:?} ua: {}", &err, &body);
@@ -47,8 +46,13 @@ async fn serve_request(
     }
 }
 
+async fn shutdown_signal() {
+    tokio::signal::ctrl_c()
+        .await
+        .expect("failed to install CTRL+C signal handler");
+}
+
 pub async fn server(listen_address: SocketAddr, device_detector: DeviceDetector) {
-    // TODO make ip configurable
     eprintln!("Listening on {}", listen_address);
 
     let device_detector = Arc::new(device_detector);
@@ -65,6 +69,8 @@ pub async fn server(listen_address: SocketAddr, device_detector: DeviceDetector)
     });
 
     let server = Server::bind(&listen_address).serve(make_svc);
+
+    let server = server.with_graceful_shutdown(shutdown_signal());
 
     // Run this server for... forever!
     if let Err(e) = server.await {

@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use fancy_regex::{Captures, Regex, CaptureMatches, Error, Expander, Replacer};
+use fancy_regex::{CaptureMatches, Captures, Error, Expander, Regex, Replacer};
 use once_cell::sync::Lazy;
 
 use once_cell::sync::OnceCell;
@@ -24,13 +24,12 @@ pub(crate) struct SafeRegex {
 }
 
 impl SafeRegex {
-
     fn squash_runtime_error<T>(err: Result<T, Error>, ret: T) -> Result<T, Error> {
         // this is either a stack overflow or a backtrack limit reached.
         // in either case, we don't want to crash, just deny a match and move on.
         match err {
             Err(Error::RuntimeError(_)) => Ok(ret),
-            err => err
+            err => err,
         }
     }
 
@@ -53,10 +52,7 @@ impl SafeRegex {
         self.regex.replace_all(text, rep)
     }
 
-    pub fn captures_iter<'r, 'h>(
-    &'r self,
-    haystack: &'h str
-) -> CaptureMatches<'r, 'h> {
+    pub fn captures_iter<'r, 'h>(&'r self, haystack: &'h str) -> CaptureMatches<'r, 'h> {
         self.regex.captures_iter(haystack)
     }
 }
@@ -79,7 +75,7 @@ impl LazyRegex {
             // println!("is_match compilation: {}", &self.pattern);
             SafeRegex::new(&self.pattern)
         })?;
-        Ok(regex.is_match(text)?)
+        regex.is_match(text)
     }
 
     pub(crate) fn captures<'t>(&self, text: &'t str) -> Result<Option<Captures<'t>>> {
@@ -87,7 +83,7 @@ impl LazyRegex {
             // println!("captures compilation: {}", &self.pattern);
             SafeRegex::new(&self.pattern)
         })?;
-        Ok(regex.captures(text)?)
+        regex.captures(text)
     }
 }
 

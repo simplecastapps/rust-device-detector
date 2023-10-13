@@ -4,7 +4,10 @@ use super::{Client, ClientList};
 use once_cell::sync::Lazy;
 
 static CLIENT_LIST: Lazy<ClientList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/mediaplayers.yml"));
+    let contents = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/regexes/client/mediaplayers.yml"
+    ));
     ClientList::from_file(contents).expect("loading mediaplayers.yml")
 });
 

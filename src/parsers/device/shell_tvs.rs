@@ -8,7 +8,10 @@ use super::DeviceType;
 use crate::parsers::utils::{static_user_agent_match, SafeRegex as Regex};
 
 static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/device/shell_tv.yml"));
+    let contents = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/regexes/device/shell_tv.yml"
+    ));
     DeviceList::from_file(contents).expect("loading shell_tv.yml")
 });
 

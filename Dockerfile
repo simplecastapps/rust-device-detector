@@ -17,6 +17,10 @@ COPY Cargo.lock /app/Cargo.lock
 COPY src /app/src
 COPY regexes /app/regexes
 
+COPY test_each_file/Cargo.toml /app/test_each_file/Cargo.toml
+COPY test_each_file/src /app/test_each_file/src
+COPY test_each_file/src /app/test_each_file/src
+
 VOLUME ["/app"]
 
 WORKDIR /app/
@@ -33,6 +37,8 @@ RUN groupadd app_group && \
 EXPOSE 8080
 
 COPY --from=build /home/app_user/target/release/rust-device-detector /usr/local/bin/rust-device-detector
+COPY --from=build /home/app_user/target/release/librust_device_detector.so /usr/local/lib/librust_device_detector.so
+COPY --from=build /home/app_user/target/release/librust_device_detector.a /usr/local/lib/librust_device_detector.a
 
 USER app_user:app_group
 WORKDIR /app/

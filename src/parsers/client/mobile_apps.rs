@@ -6,7 +6,10 @@ use once_cell::sync::Lazy;
 use crate::client_hints::ClientHint;
 
 static CLIENT_LIST: Lazy<ClientList> = Lazy::new(|| {
-    let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"),"/regexes/client/mobile_apps.yml"));
+    let contents = include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/regexes/client/mobile_apps.yml"
+    ));
     ClientList::from_file(contents).expect("loading mobile_apps.yml")
 });
 
