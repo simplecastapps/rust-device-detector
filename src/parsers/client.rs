@@ -123,12 +123,14 @@ impl ClientList {
     pub fn lookup(&self, ua: &str, r#type: ClientType) -> Result<Option<Client>> {
         for client in self.clients.iter() {
             if client.regex.is_match(ua)? {
+
                 let mut version = "".to_owned();
                 let mut name = "".to_owned();
                 let caps = client.regex.captures(ua)?.expect("valid_regex");
 
                 // expands $1, $2 etc in names / versions to captures from regex
                 caps.expand(&client.version, &mut version);
+
                 // TODO I don't know if this is needed, but here it is.
                 let version = if version.ends_with(&['.', ' ']) {
                     version.trim_end_matches(&['.', ' ']).to_owned()
@@ -136,7 +138,7 @@ impl ClientList {
                     version
                 };
 
-                let version = if version.is_empty() { Some(version) } else { None };
+                let version = if !version.is_empty() { Some(version) } else { None };
 
                 caps.expand(&client.name, &mut name);
 

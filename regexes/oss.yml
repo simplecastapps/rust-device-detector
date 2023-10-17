@@ -6,6 +6,13 @@
 ###############
 
 ##########
+# PICO OS (https://www.picoxr.com/global/software/pico-os)
+##########
+- regex: 'PICO.+OS(\d+[\.\d]*)'
+  name: 'PICO OS'
+  version: '$1'
+
+##########
 # RedOS (https://redos.red-soft.ru/)
 ##########
 - regex: 'RED OS; Linux'
@@ -359,7 +366,7 @@
   name: 'Android'
   version: '$1'
 
-- regex: '(?:(?:Orca-)?(?<!like )Android|Adr|AOSP)[ /]?(?:[a-z]+ )?(\d+[\.\d]*)'
+- regex: '(?:(?:Orca-)?(?<!like |/|RadioPublic |Anghami )Android|Adr|AOSP)[ /]?(?:[a-z]+ )?(\d+[\.\d]*)'
   name: 'Android'
   version: '$1'
 
@@ -800,6 +807,8 @@
 - regex: '^(?!com.apple.Safari.SearchHelper|Safari).*CFNetwork/.+ Darwin/(\d+[\.\d]+)(?!.*(?:x86_64|i386|PowerMac|Power%20Macintosh))'
   name: 'iOS'
   versions:
+    - regex: 'Darwin/23.1.0'
+      version: '17.1'
     - regex: 'Darwin/23.0.0'
       version: '17.0'
     - regex: 'Darwin/22.6.0'
@@ -957,7 +966,7 @@
   name: 'iOS'
   version: '$1.$2.$3'
 
-- regex: '(?:CPU OS|iPh(?:one)?[ _]OS|iPhone.+ OS|iOS)[ _/](\d+(?:[_\.]\d+)*)'
+- regex: '(?:CPU OS|iPh(?:one)?[ _]OS|iPhone.+ OS|PodMN.+iPhone|iOS)[ _/](\d+(?:[_\.]\d+)*)'
   name: 'iOS'
   version: '$1'
 
@@ -1023,6 +1032,8 @@
 - regex: '(?:CFNetwork|StudioDisplay)/.+Darwin(?:/|; )(?:[\d\.]+).+(?:x86_64|i386|Power%20Macintosh)|(?:x86_64-apple-)?darwin(?:[\d\.]+)|PowerMac|com.apple.Safari.SearchHelper|^Safari'
   name: 'Mac'
   versions:
+    - regex: '(?:x86_64-apple-)?Darwin(?:/|; )?23.1.0'
+      version: '14.1'
     - regex: '(?:x86_64-apple-)?Darwin(?:/|; )?23.0.0'
       version: '14.0'
     - regex: '(?:x86_64-apple-)?Darwin(?:/|; )?22.6.0'

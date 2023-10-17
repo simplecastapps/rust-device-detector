@@ -465,7 +465,7 @@
   name: 'Emacs'
   version: '$1'
 
-- regex: '^FDM[ /]([\d\.a-z]+)'
+- regex: '^FDM[ /]([\d\.]+)'
   name: 'Free Download Manager'
   version: '$1'
 
@@ -473,6 +473,11 @@
 - regex: 'OkDownload/([\d\.]+)'
   name: 'OKDownload Library'
   version: '$1'
+
+# podcast host https://libsyn.com (probably an importer)
+- regex: '^Libsyn4-?(?:peek|download)$'
+  name: 'Libsyn'
+  version: ''
 
 # any ios application that uses apple core media but doesn't set its user
 # agent will default to this, always with 1.0.0 version.

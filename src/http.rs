@@ -19,10 +19,6 @@ async fn serve_request(
             let body = hyper::body::to_bytes(req.into_body()).await?;
             let body = String::from_utf8(body.to_vec())?;
 
-            #[cfg(feature = "cache")]
-            let detection = detector.parse_cached(&body, None);
-
-            #[cfg(not(feature = "cache"))]
             let detection = detector.parse(&body, None);
 
             let detection = detection.unwrap_or_else(|err| {

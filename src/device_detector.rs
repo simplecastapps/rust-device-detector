@@ -27,7 +27,6 @@ pub struct KnownDevice {
     pub os: Option<oss::OS>,
 }
 
-
 impl Detection {
     pub fn get_bot(&self) -> Option<&Bot> {
         match self {
@@ -45,7 +44,10 @@ impl Detection {
 
     /// Did we detect a bot? If not, then it is a known device.
     pub fn is_bot(&self) -> bool {
-        matches!(self, Self::Bot(_))
+        match self {
+            Self::Bot(_) => true,
+            _ => false,
+        }
     }
     /// This is purely to aid in generating test cases, you should not rely on this for
     /// actual production usage. Only useful for normal stuff, not bots, etc.
@@ -85,7 +87,6 @@ impl Detection {
             .and_then(|x| x.as_str())
             .unwrap_or("\"\"");
 
-        #[allow(clippy::comparison_to_empty)]
         let os = if os_name == "\"\"" && os_version == "" && os_platform == "\"\"" {
             "os: []".to_owned()
         } else {
@@ -126,7 +127,6 @@ impl Detection {
             .and_then(|x| x.as_str())
             .unwrap_or("");
 
-        #[allow(clippy::comparison_to_empty)]
         let client = if client_type == "\"\""
             && client_name == "\"\""
             && client_version == ""
@@ -164,11 +164,11 @@ impl Detection {
             val.get("device")
                 .and_then(|x| x.get("type"))
                 .and_then(|x| x.as_str())
-                .map(|x| {
+                .and_then(|x| {
                     if x == "television" {
-                        "tv"
+                        Some("tv")
                     } else {
-                        x
+                        Some(x)
                     }
                 })
                 .unwrap_or("\"\""),
@@ -180,7 +180,7 @@ impl Detection {
                 .and_then(|x| x.get("model"))
                 .and_then(|x| x.as_str())
                 .and_then(|x| {
-                    if x.is_empty() {
+                    if x == "" {
                         None
                     } else {
                         Some(x)
@@ -570,45 +570,48 @@ impl DeviceDetector {
         }
     }
 
-    #[cfg(feature = "cache")]
-    pub fn parse_cached(
-        &self,
-        ua: &str,
-        headers: Option<Vec<(String, String)>>,
-    ) -> Result<Detection> {
-        if !self.caching {
-            return self.parse(ua, headers);
-        }
-
-        if let Some(res) = self.cache.get(ua) {
-            return Ok(res);
-        };
-
-        let known = self.parse(ua, headers.clone())?;
-
-        self.cache.insert(ua.to_owned(), known.clone());
-
-        Ok(known)
-    }
 
     pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
-        if let Some(bot) = bot::lookup_bot(ua)? {
-            return Ok(Detection::Bot(bot));
-        }
 
-        let client_hints = match headers {
-            Some(headers) => Some(ClientHint::from_headers(headers)?),
-            None => None,
+        let parse = || {
+            if let Some(bot) = bot::lookup_bot(ua)? {
+                return Ok(Detection::Bot(bot));
+            }
+
+            let client_hints = match headers {
+                Some(headers) => Some(ClientHint::from_headers(headers)?),
+                None => None,
+            };
+
+            let os = oss::lookup(ua, client_hints.as_ref())?;
+
+            let client = client::lookup(ua, client_hints.as_ref())?;
+
+            let device = device::lookup(ua, client.as_ref(), client_hints.as_ref(), os.as_ref())?;
+
+            let known = Detection::Known(KnownDevice { client, device, os });
+
+            Ok::<_, anyhow::Error>(known)
         };
 
-        let os = oss::lookup(ua, client_hints.as_ref())?;
+        #[cfg(feature = "cache")]
+        {
+            if !self.caching {
+                return Ok(parse()?);
+            }
 
-        let client = client::lookup(ua, client_hints.as_ref())?;
+            if let Some(res) = self.cache.get(ua) {
+                return Ok(res);
+            };
 
-        let device = device::lookup(ua, client.as_ref(), client_hints.as_ref(), os.as_ref())?;
+            let known = parse()?;
 
-        let known = Detection::Known(KnownDevice { client, device, os });
+            self.cache.insert(ua.to_owned(), known.clone());
 
-        Ok(known)
+            Ok(known)
+        }
+
+        #[cfg(not(feature = "cache"))]
+        Ok(parse()?)
     }
 }

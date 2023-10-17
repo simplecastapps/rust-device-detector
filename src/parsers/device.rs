@@ -271,7 +271,14 @@ pub fn lookup(
         {
             device.brand = Some("Apple".to_owned());
         }
+    }
 
+    static VR: Lazy<Regex> = static_user_agent_match!(r#" VR "#);
+    if device.device_type.is_none() && VR.is_match(&ua)? {
+        device.device_type = Some(DeviceType::Wearable);
+    }
+
+    if let Some(os) = &os_info {
         if device.device_type.is_none() {
             static CHROME: Lazy<Regex> = static_user_agent_match!(r#"Chrome/[\.0-9]*"#);
             static SAFARI_PHONE: Lazy<Regex> =

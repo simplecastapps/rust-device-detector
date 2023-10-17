@@ -151,6 +151,7 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("ORD", "Ordissimo"),
         ("PAR", "Pardus"),
         ("PCL", "PCLinuxOS"),
+        ("PIC", "PICO OS"),
         ("PLA", "Plasma Mobile"),
         ("PSP", "PlayStation Portable"),
         ("PS3", "PlayStation"),
@@ -214,7 +215,7 @@ fn os_families() -> HashMap<String, Vec<String>> {
             "Android",
             vec![
                 "AND", "CYN", "FIR", "REM", "RZD", "MLD", "MCD", "YNS", "GRI", "HAR", "ADR", "CLR",
-                "BOS", "REV", "LEN", "SIR", "RRS", "WER",
+                "BOS", "REV", "LEN", "SIR", "RRS", "WER", "PIC",
             ],
         ),
         ("AmigaOS", vec!["AMG", "MOR"]),
