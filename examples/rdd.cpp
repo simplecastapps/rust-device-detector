@@ -23,7 +23,7 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
   cout << "looking up '" << ua << "'" << endl;
   RDDDetection *dt = rdd_lookup(dd, ua);
 
-  cout << "IS" << endl;
+  cout << "IS:" << endl;
 
   cout << "  bot: " << rdd_is_bot(dt) << endl;
   cout << "  mobile: " << rdd_is_mobile(dt) << endl;
@@ -63,23 +63,23 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
     char *bot_producer_url = rdd_bot_producer_url(bot);
 
     if (bot_name) {
-      cout << "  bot_name: " << bot_name << endl;
+      cout << "  name: " << bot_name << endl;
       rdd_free_string(bot_name);
     }
     if (bot_category) {
-      cout << "  bot_category: " << bot_category << endl;
+      cout << "  category: " << bot_category << endl;
       rdd_free_string(bot_category);
     }
     if (bot_url) {
-      cout << "  bot_url: " << bot_url << endl;
+      cout << "  url: " << bot_url << endl;
       rdd_free_string(bot_url);
     }
     if (bot_producer_name) {
-      cout << "  bot_producer_name: " << bot_producer_name << endl;
+      cout << "  producer_name: " << bot_producer_name << endl;
       rdd_free_string(bot_producer_name);
     }
     if (bot_producer_url) {
-      cout << "  bot_producer_url: " << bot_producer_url << endl;
+      cout << "  producer_url: " << bot_producer_url << endl;
       rdd_free_string(bot_producer_url);
     }
 
@@ -88,7 +88,7 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
   const RDDClient *client = rdd_client(dt);
 
   if (client) {
-    cout << "Client:" << endl;
+    cout << "CLIENT:" << endl;
 
     char *client_name = rdd_client_name(client);
     char *client_type = rdd_client_type(client);
@@ -97,27 +97,27 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
     char *client_browser_version = rdd_client_browser_version(client);
 
     if (client_name) {
-      cout << "  client_name: " << client_name << endl;
+      cout << "  name: " << client_name << endl;
       rdd_free_string(client_name);
     }
 
     if (client_type) {
-      cout << "  client_type: " << client_type << endl;
+      cout << "  type: " << client_type << endl;
       rdd_free_string(client_type);
     }
 
     if (client_version) {
-      cout << "  client_version: " << client_version << endl;
+      cout << "  version: " << client_version << endl;
       rdd_free_string(client_version);
     }
 
     if (client_browser_engine) {
-      cout << "  client_browser_engine: " << client_browser_engine << endl;
+      cout << "  browser_engine: " << client_browser_engine << endl;
       rdd_free_string(client_browser_engine);
     }
 
     if (client_browser_version) {
-      cout << "  client_browser_version: " << client_browser_version << endl;
+      cout << "  browser_version: " << client_browser_version << endl;
       rdd_free_string(client_browser_version);
     }
 
@@ -128,23 +128,23 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
 
   const RDDDevice *device = rdd_device(dt);
   if (device) {
-    cout << "Device:" << endl;
+    cout << "DEVICE:" << endl;
 
     char *device_brand = rdd_device_brand(device);
     char *device_type = rdd_device_type(device);
     char *device_model = rdd_device_model(device);
 
     if (device_brand) {
-      cout << "  device_brand: " << device_brand << endl;
+      cout << "  brand: " << device_brand << endl;
       rdd_free_string(device_brand);
     }
  
     if (device_type) {
-      cout << "  device_type: " << device_type << endl;
+      cout << "  type: " << device_type << endl;
       rdd_free_string(device_type);
     }
    if (device_model) {
-      cout << "  device_model: " << device_model << endl;
+      cout << "  model: " << device_model << endl;
       rdd_free_string(device_model);
    }
 
@@ -162,22 +162,22 @@ void lookup(const RDDDeviceDetector *dd, const char *ua) {
     char *os_family = rdd_os_family(os);
 
     if (os_name) {
-      cout << "  os_name: " << os_name << endl;
+      cout << "  name: " << os_name << endl;
       rdd_free_string(os_name);
     }
 
     if (os_version) {
-      cout << "  os_version: " << os_version << endl;
+      cout << "  version: " << os_version << endl;
       rdd_free_string(os_version);
     }
 
     if (os_platform) {
-      cout << "  os_platform: " << os_platform << endl;
+      cout << "  platform: " << os_platform << endl;
       rdd_free_string(os_platform);
     }
 
     if (os_family) {
-      cout << "  os_family: " << os_family << endl;
+      cout << "  family: " << os_family << endl;
       rdd_free_string(os_family);
     }
   }
