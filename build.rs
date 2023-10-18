@@ -34,8 +34,6 @@ fn build_cpp_header() {
             // > rustc -Z parse-only /home/toad/working/rust-device-detector/src/ffi.rs
             // not sure why it doesn't just run that itself and show you the error.
             eprintln!("Error generating bindings: {}", e);
-
-            std::process::exit(1);
         }
     }
 }
