@@ -2195,7 +2195,7 @@
   name: 'L.A. Times'
   version: ''
 
-- regex: '(?:^NYT(?: |%20)?Audio|nytios)/([\d.]+)'
+- regex: '(?:^NYT(?: |%20)?Audio(?:-iOS)?|nytios)/([\d.]+)'
   name: 'The New York Times'
   version: '$1'
 
