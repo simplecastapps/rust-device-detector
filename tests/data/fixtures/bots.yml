@@ -5830,7 +5830,7 @@
     url: https://www.phpmyadmin.net/
 
 -
-  user_agent: Trackable/1.0
+  user_agent: Trackable/0.1 NNjCeA
   bot:
     name: Chartable
     category: Tracking Prefix

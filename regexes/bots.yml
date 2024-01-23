@@ -1540,7 +1540,7 @@
   category: 'Feed Reader'
   url: 'https://theoldreader.com'
 
-- regex: 'Trackable/1.0'
+- regex: 'Trackable/0.1'
   name: 'Chartable'
   category: 'Tracking Prefix'
   url: 'https://help.chartable.com/article/34-what-is-the-trackable-analytics-prefix'
