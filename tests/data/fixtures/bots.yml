@@ -5828,3 +5828,13 @@
     name: phpMyAdmin
     category: Service Agent
     url: https://www.phpmyadmin.net/
+
+-
+  user_agent: Trackable/1.0
+  bot:
+    name: Chartable
+    category: Tracking Prefix
+    url: "https://help.chartable.com/article/34-what-is-the-trackable-analytics-prefix"
+    producer:
+      name: 'Chartable'
+      url: 'https://chartable.com'

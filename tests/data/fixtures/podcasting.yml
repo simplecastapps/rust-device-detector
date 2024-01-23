@@ -9442,20 +9442,6 @@
   browser_family: Unknown
 
 -
-  user_agent: 'Trackable/0.1 NNjCeA'
-  os: [ ]
-  client:
-    type: mobile app
-    name: Trackable
-    version: "0.1"
-  device:
-    type: ""
-    brand: ""
-    model: ''
-  os_family: Unknown
-  browser_family: Unknown
-
--
   user_agent: 'Uforia/1056 CFNetwork/1406.0.4 Darwin/22.4.0'
   os:
     name: iOS

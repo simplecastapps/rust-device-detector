@@ -948,7 +948,7 @@ checksum = "436b050e76ed2903236f032a59761c1eb99e1b0aead2c257922771dab1fc8c78"
 
 [[package]]
 name = "rust-device-detector"
-version = "0.4.1"
+version = "0.4.2"
 dependencies = [
  "anyhow",
  "cbindgen",
