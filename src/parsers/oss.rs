@@ -5,11 +5,14 @@ use serde_yaml::Value;
 
 use serde::{Deserialize, Serialize};
 
+use std::collections::HashMap;
+
 use crate::client_hints::ClientHint;
 use crate::known_oss::AvailableOSs;
 use crate::parsers::utils::{
     lazy_user_agent_match, static_user_agent_match, LazyRegex, SafeRegex as Regex,
 };
+
 
 static OS_LIST: Lazy<OSList> = Lazy::new(|| {
     let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/regexes/oss.yml"));
@@ -106,6 +109,40 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
                     if os_from_hints.name == "HarmonyOS" {
                         os_from_hints.version = None;
                     }
+
+                    if os_from_hints.name == "Fire OS" {
+                        if let Some(os_hint_version) = os_from_hints.version.as_deref() {
+                            static FIRE_OS_VERSION: Lazy<HashMap<&str, &str>> =
+                                Lazy::new(||
+                                          [
+                                          ("11" , "8"),
+                                          ("10" , "7"),
+                                          ("9" , "7"),
+                                          ("7" , "6"),
+                                          ("5" , "5"),
+                                          ("4.4.3" , "4.5.1"),
+                                          ("4.4.2" , "4"),
+                                          ("4.2.2" , "3"),
+                                          ("4.0.3" , "3"),
+                                          ("4.0.2" , "3"),
+                                          ("4" , "2"),
+                                          ("2" , "1"),
+                                          ].into_iter().collect::<HashMap<_,_>>()
+                                         );
+
+                            let major_version = os_from_hints
+                                .version
+                                .as_ref()
+                                .and_then(|x| x.split('.').next())
+                                .unwrap_or("0");
+
+                            if let Some(version) = FIRE_OS_VERSION.get(os_hint_version) {
+                                os_from_hints.version = Some((*version).to_owned());
+                            } else {
+                                os_from_hints.version = FIRE_OS_VERSION.get(major_version).map(|x| (*x).to_owned());
+                            }
+                        }
+                    }
                 }
             }
 
@@ -141,6 +178,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
         "com.hisense.odinbrowser",
         "com.seraphic.openinet.pre",
         "com.appssppa.idesktoppcbrowser",
+        "every.browser.inc",
     ];
 
     if let Some(os) = &mut res {

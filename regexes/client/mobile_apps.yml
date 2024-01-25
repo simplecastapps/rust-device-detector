@@ -167,7 +167,7 @@
   version: '$1'
 
 # AFNetworking generic
-- regex: '(?!AlohaBrowser)([^/]*)/(\d+\.[\d.]+) \((?:iPhone|iPad); (?:iOS|iPadOS) [0-9\.]+; Scale/[0-9\.]+\)'
+- regex: '(?!AlohaBrowser)([^/;]*)/(\d+\.[\d.]+) \((?:iPhone|iPad); (?:iOS|iPadOS) [0-9\.]+; Scale/[0-9\.]+\)'
   name: '$1'
   version: '$2'
 
@@ -1374,7 +1374,6 @@
   version: '$1'
 
 # Spotify (https://apps.apple.com/us/app/spotify-music-and-podcasts/id324684580)
-# Spotify/121600947 Win32_x86_64/0 (PC laptop)
 - regex: '(?:Spotify(?:-Lite)?/(\d+\.[.\d]+|12\d+)|^spotify_)'
   name: 'Spotify'
   version: '$1'
@@ -2200,4 +2199,12 @@
 
 - regex: '^Podu_player$'
   name: 'podU'
+  version: '$1'
+
+- regex: '^TiviMate/([\d\.]+)'
+  name: 'TiviMate'
+  version: '$1'
+
+- regex: 'IPTV/([\d\.]+)'
+  name: 'IPTV'
   version: '$1'

@@ -9,7 +9,7 @@ pub(crate) fn basic(idx: usize, value: &Value) -> Result<()> {
     let dd = &utils::DD;
     let dd_res = dd.parse(ua, None)?;
 
-    assert!(dd_res.is_bot(), "expected bot");
+    assert!(dd_res.is_bot(), "expected bot test case: {}\n ua: {}", idx, ua);
 
     let dd_bot_name: Option<&str> = dd_res.get_bot().map(|bot| bot.name.as_ref());
     let test_bot_name: Option<&str> = test_bot["name"].as_str();
@@ -77,7 +77,8 @@ pub(crate) fn basic(idx: usize, value: &Value) -> Result<()> {
     let test_bot_url: Option<&str> = test_bot
         .get("producer")
         .and_then(|prod| prod.as_mapping())
-        .and_then(|prod| prod["url"].as_str());
+        .and_then(|prod| prod.get("url"))
+        .and_then(|url| url.as_str());
 
     assert!(
         (test_bot_url == dd_bot_producer_url

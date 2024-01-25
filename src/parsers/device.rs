@@ -159,14 +159,16 @@ struct ModelMatchResult {
 //    lazy_static! {
 //        static R1: Lazy<Regex> =
 //            static_user_agent_match!(r#"(?:Windows (?:NT|IoT)|X11; Linux x86_64)"#);
-//        static R2: Lazy<Regex> = static_user_agent_match!(
+//        static R2: Lazy<Regex> =
+//            static_user_agent_match!(r#"CE-HTML");
+//        static R3: Lazy<Regex> = static_user_agent_match!(
 //            r#" Mozilla/|Andr[o0]id|Tablet|Mobile|iPhone|Windows Phone|ricoh|OculusBrowser"#
 //        );
-//        static R3: Lazy<Regex> =
+//        static R4: Lazy<Regex> =
 //            static_user_agent_match!(r#"Lenovo|compatible; MSIE|Trident/|Tesla/|XBOX|FBMD/|ARM; ?([^)]+)"#);
 //    }
 //
-//    R1.is_match(ua).unwrap() || R2.is_match(ua).unwrap() && R3.is_match(ua).unwrap()
+//    R1.is_match(ua).unwrap() && !R2.is_match(ua) && !R3.is_match(ua).unwrap() && !R4.is_match(ua).unwrap()
 //}
 
 pub fn lookup(
@@ -366,7 +368,7 @@ pub fn lookup(
 
     static OPERA: Lazy<Regex> = static_user_agent_match!(r#"Opera TV Store| OMI/"#);
     static ANDR0ID: Lazy<Regex> =
-        static_user_agent_match!(r#"Andr0id|Android TV|\(lite\) TV|BRAVIA"#);
+        static_user_agent_match!(r#"Andr0id|(?:Android(?: UHD)?|Google) TV|\(lite\) TV|BRAVIA'"#);
     static TIZEN: Lazy<Regex> = static_user_agent_match!(r#"SmartTV|Tizen.+ TV .+$"#);
     static GENERIC_TV: Lazy<Regex> = static_user_agent_match!(r#"\(TV;"#);
 
@@ -387,6 +389,10 @@ pub fn lookup(
             "LUJO TV Browser",
             "LogicUI TV Browser",
             "Open TV Browser",
+            "Seraphic Sraf",
+            "Opera Devices",
+            "Crow Browser",
+            "Vewd Browser"
         ]
         .iter()
         .any(|x| *x == client.name)
@@ -401,7 +407,7 @@ pub fn lookup(
     }
 
     static DESKTOP_FRAGMENT: Lazy<Regex> =
-        static_user_agent_match!(r#"Desktop (x(?:32|64)|WOW64);"#);
+        static_user_agent_match!(r#"Desktop(?: (x(?:32|64)|WOW64))?;"#);
 
     if let Some(device_type) = &device.device_type {
         if *device_type != DeviceType::Desktop
