@@ -567,9 +567,7 @@ impl DeviceDetector {
         }
     }
 
-
     pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
-
         let parse = || {
             if let Some(bot) = bot::lookup_bot(ua)? {
                 return Ok(Detection::Bot(bot));

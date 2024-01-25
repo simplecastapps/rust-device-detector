@@ -650,7 +650,7 @@ fn browser_families() -> HashMap<String, Vec<String>> {
                 "O5", "R1", "I1", "HO", "A5", "X1", "18", "B5", "B6", "TC", "A6", "2X", "F4", "YG",
                 "WR", "NA", "DM", "1M", "A7", "XN", "XT", "XB", "W1", "HT", "B8", "F5", "B9", "WA",
                 "T0", "HC", "O6", "P7", "LJ", "LC", "O7", "N2", "A8", "P8", "RB", "1W", "EV", "I9",
-                "V4", "H4", "1T", "M5", "0S", "0C", "ZR", "D6", "F6", "RC", "WD", "P3", "FT"
+                "V4", "H4", "1T", "M5", "0S", "0C", "ZR", "D6", "F6", "RC", "WD", "P3", "FT",
             ],
         ),
         (
@@ -697,7 +697,7 @@ pub fn mobile_only_browsers() -> HashSet<String> {
         "O4", "XO", "U0", "B0", "VA", "X0", "A5", "X1", "18", "B5", "B6", "TC", "A6", "2X", "F4",
         "YG", "WR", "NA", "DM", "1M", "A7", "XN", "XT", "XB", "W1", "HT", "B7", "B9", "T0", "I8",
         "O6", "P7", "O8", "4B", "A8", "P8", "1W", "EV", "Z0", "I9", "V4", "H4", "M5", "0S", "0C",
-        "ZR", "D6", "F6", "P3", "FT"
+        "ZR", "D6", "F6", "P3", "FT",
     ]
     .into_iter()
     .map(|f| f.to_owned())

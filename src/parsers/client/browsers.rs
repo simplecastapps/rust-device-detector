@@ -34,7 +34,10 @@ static CLIENT_HINT_MAPPING: Lazy<ClientHintMapping> = Lazy::new(|| {
     ClientHintMapping::new(vec![
         ("Chrome".to_owned(), vec!["Google Chrome".to_owned()]),
         ("Vewd Browser".to_owned(), vec!["Vewd Core".to_owned()]),
-        ("DuckDuckGo Privacy Browser".to_owned(), vec!["DuckDuckGo".to_owned()]),
+        (
+            "DuckDuckGo Privacy Browser".to_owned(),
+            vec!["DuckDuckGo".to_owned()],
+        ),
     ])
 });
 
@@ -86,7 +89,9 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         if let Some(client_hints_version) = &client_from_hints.version {
             // If the version reported from the client hints is YYYY or YYYY.MM (e.g., 2022 or 2022.04), then it's Iridium.
             // https://iridiumbrowser.de/news/
-            let iridium = ["2020","2021","2022","2023"].iter().any(|year| client_hints_version.starts_with(year));
+            let iridium = ["2020", "2021", "2022", "2023"]
+                .iter()
+                .any(|year| client_hints_version.starts_with(year));
             if iridium {
                 client_from_hints.name = "Iridium".to_owned();
                 // client_from_hints.short = "I1".to_owned();
@@ -228,7 +233,6 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                 client.engine = Some("Blink".to_owned());
                 client.engine_version = None;
             }
-
         }
     }
 

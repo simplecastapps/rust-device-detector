@@ -27,7 +27,12 @@ fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let dd = &utils::DD;
     let dd_res = dd.parse(ua, None)?;
 
-    assert!(!dd_res.is_bot(), "not a bot test case: {}\n ua: {}", idx, ua);
+    assert!(
+        !dd_res.is_bot(),
+        "not a bot test case: {}\n ua: {}",
+        idx,
+        ua
+    );
 
     let dd_client_type: Option<&str> = dd_res
         .get_known_device()

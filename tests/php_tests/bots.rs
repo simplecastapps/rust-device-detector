@@ -9,7 +9,12 @@ pub(crate) fn basic(idx: usize, value: &Value) -> Result<()> {
     let dd = &utils::DD;
     let dd_res = dd.parse(ua, None)?;
 
-    assert!(dd_res.is_bot(), "expected bot test case: {}\n ua: {}", idx, ua);
+    assert!(
+        dd_res.is_bot(),
+        "expected bot test case: {}\n ua: {}",
+        idx,
+        ua
+    );
 
     let dd_bot_name: Option<&str> = dd_res.get_bot().map(|bot| bot.name.as_ref());
     let test_bot_name: Option<&str> = test_bot["name"].as_str();

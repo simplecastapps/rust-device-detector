@@ -392,7 +392,7 @@ pub fn lookup(
             "Seraphic Sraf",
             "Opera Devices",
             "Crow Browser",
-            "Vewd Browser"
+            "Vewd Browser",
         ]
         .iter()
         .any(|x| *x == client.name)
@@ -401,9 +401,8 @@ pub fn lookup(
         }
     }
 
-    if device.device_type.is_none() &&
-        GENERIC_TV.is_match(&ua)? {
-            device.device_type = Some(DeviceType::Television);
+    if device.device_type.is_none() && GENERIC_TV.is_match(&ua)? {
+        device.device_type = Some(DeviceType::Television);
     }
 
     static DESKTOP_FRAGMENT: Lazy<Regex> =
