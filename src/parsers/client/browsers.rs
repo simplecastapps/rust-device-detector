@@ -31,10 +31,14 @@ static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
 });
 
 static CLIENT_HINT_MAPPING: Lazy<ClientHintMapping> = Lazy::new(|| {
-    ClientHintMapping::new(vec![(
-        "Chrome".to_owned(),
-        vec!["Google Chrome".to_owned()],
-    )])
+    ClientHintMapping::new(vec![
+        ("Chrome".to_owned(), vec!["Google Chrome".to_owned()]),
+        ("Vewd Browser".to_owned(), vec!["Vewd Core".to_owned()]),
+        (
+            "DuckDuckGo Privacy Browser".to_owned(),
+            vec!["DuckDuckGo".to_owned()],
+        ),
+    ])
 });
 
 static AVAILABLE_BROWSERS: Lazy<AvailableBrowsers> = Lazy::new(AvailableBrowsers::default);
@@ -58,7 +62,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         // ensure chromium is the last result
         possible_results.sort_by_key(|x| x.0 == "Chromium");
 
-        if let Some((brand_version, brand_result)) = possible_results.get(0).map(|x| (x.1, x.2)) {
+        if let Some((brand_version, brand_result)) = possible_results.first().map(|x| (x.1, x.2)) {
             let version = if let Some(ua_full_version) = &client_hints.ua_full_version {
                 Some(ua_full_version.to_owned())
             } else {
@@ -82,13 +86,39 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
     };
 
     if let Some(client_from_hints) = client_from_hints.as_mut() {
-        if client_from_hints.version.as_deref() == Some("2021.12")
-            || client_from_hints.version.as_deref() == Some("2022")
-            || client_from_hints.version.as_deref() == Some("2022.04")
-        {
-            client_from_hints.name = "Iridium".to_owned();
-            // client_from_hints.short = "I1".to_owned();
+        if let Some(client_hints_version) = &client_from_hints.version {
+            // If the version reported from the client hints is YYYY or YYYY.MM (e.g., 2022 or 2022.04), then it's Iridium.
+            // https://iridiumbrowser.de/news/
+            let iridium = ["2020", "2021", "2022", "2023"]
+                .iter()
+                .any(|year| client_hints_version.starts_with(year));
+            if iridium {
+                client_from_hints.name = "Iridium".to_owned();
+                // client_from_hints.short = "I1".to_owned();
 
+                client_from_hints.engine = client_from_ua
+                    .as_ref()
+                    .map(|x| x.engine.clone())
+                    .unwrap_or_default();
+                client_from_hints.engine_version = client_from_ua
+                    .as_ref()
+                    .map(|x| x.engine_version.clone())
+                    .unwrap_or_default();
+            }
+        }
+
+        if client_from_hints.name == "Atom" || client_from_hints.name == "Huawei Browser" {
+            client_from_hints.version = client_from_ua
+                .as_ref()
+                .map(|x| x.version.clone())
+                .unwrap_or_default();
+        }
+
+        if client_from_hints.name == "DuckDuckGo Privacy Browser" {
+            client_from_hints.version = None;
+        }
+
+        if client_from_hints.name == "Vewd Browser" {
             client_from_hints.engine = client_from_ua
                 .as_ref()
                 .map(|x| x.engine.clone())
@@ -96,13 +126,6 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
             client_from_hints.engine_version = client_from_ua
                 .as_ref()
                 .map(|x| x.engine_version.clone())
-                .unwrap_or_default();
-        }
-
-        if client_from_hints.name == "Atom" || client_from_hints.name == "Huawei Browser" {
-            client_from_hints.version = client_from_ua
-                .as_ref()
-                .map(|x| x.version.clone())
                 .unwrap_or_default();
         }
 
@@ -203,6 +226,11 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
     if let Some(client) = &mut res {
         if let Some(engine) = &client.engine {
             if engine == "Blink" && client.name == "Flow Browser" {
+                client.engine_version = None;
+            }
+
+            if client.name == "Every Browser" {
+                client.engine = Some("Blink".to_owned());
                 client.engine_version = None;
             }
         }
@@ -315,7 +343,7 @@ impl BrowserClientList {
 
         let mut token = engine;
         if engine == "Blink" {
-            token = "Chrome";
+            token = "(?:Chrome|Cronet)";
         }
 
         use crate::parsers::utils::LimitedUserMatchRegex;

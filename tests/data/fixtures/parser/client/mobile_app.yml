@@ -1553,3 +1553,27 @@
     type: mobile app
     name: Apple TV
     version: ""
+-
+  user_agent: Mozilla/5.0 (iPad; CPU OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;WeRead/4.1.3 (iPad; iOS 12.3.1; Scale/2.00)
+  client:
+    type: mobile app
+    name: WeRead
+    version: 4.1.3
+-
+  user_agent: Spotify/120800923 OSX/0 (MacBookPro6,2)
+  client:
+    type: mobile app
+    name: Spotify
+    version: "120800923"
+-
+  user_agent: TiviMate/4.7.0 (Onn. 4K Streaming Box; Android 12)
+  client:
+    type: mobile app
+    name: TiviMate
+    version: 4.7.0
+-
+  user_agent: Mozilla/5.0 (Linux; Android 8.0.0; Sagemcom DIW387_UHD_OOR Build/21.4.60) IPTV/6.1.11
+  client:
+    type: mobile app
+    name: IPTV
+    version: 6.1.11

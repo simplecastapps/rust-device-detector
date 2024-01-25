@@ -6,7 +6,6 @@ use std::env;
 // startup time.
 
 fn main() {
-
     // let mut build_dir = get_cargo_target_dir().unwrap();
     // build_dir.push("regexes");
 
@@ -16,7 +15,6 @@ fn main() {
     // let value: serde_yaml::Value = serde_yaml::from_str(contents).unwrap();
 
     build_cpp_header();
-
 }
 
 fn build_cpp_header() {

@@ -44,10 +44,7 @@ impl Detection {
 
     /// Did we detect a bot? If not, then it is a known device.
     pub fn is_bot(&self) -> bool {
-        match self {
-            Self::Bot(_) => true,
-            _ => false,
-        }
+        matches!(self, Self::Bot(_))
     }
     /// This is purely to aid in generating test cases, you should not rely on this for
     /// actual production usage. Only useful for normal stuff, not bots, etc.
@@ -87,7 +84,7 @@ impl Detection {
             .and_then(|x| x.as_str())
             .unwrap_or("\"\"");
 
-        let os = if os_name == "\"\"" && os_version == "" && os_platform == "\"\"" {
+        let os = if os_name == "\"\"" && os_version.is_empty() && os_platform == "\"\"" {
             "os: []".to_owned()
         } else {
             format!(
@@ -129,9 +126,9 @@ impl Detection {
 
         let client = if client_type == "\"\""
             && client_name == "\"\""
-            && client_version == ""
+            && client_version.is_empty()
             && client_engine == "\"\""
-            && client_engine_version == ""
+            && client_engine_version.is_empty()
         {
             "client: null".to_owned()
         } else {
@@ -164,11 +161,11 @@ impl Detection {
             val.get("device")
                 .and_then(|x| x.get("type"))
                 .and_then(|x| x.as_str())
-                .and_then(|x| {
+                .map(|x| {
                     if x == "television" {
-                        Some("tv")
+                        "tv"
                     } else {
-                        Some(x)
+                        x
                     }
                 })
                 .unwrap_or("\"\""),
@@ -180,7 +177,7 @@ impl Detection {
                 .and_then(|x| x.get("model"))
                 .and_then(|x| x.as_str())
                 .and_then(|x| {
-                    if x == "" {
+                    if x.is_empty() {
                         None
                     } else {
                         Some(x)
@@ -570,9 +567,7 @@ impl DeviceDetector {
         }
     }
 
-
     pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
-
         let parse = || {
             if let Some(bot) = bot::lookup_bot(ua)? {
                 return Ok(Detection::Bot(bot));
@@ -612,6 +607,6 @@ impl DeviceDetector {
         }
 
         #[cfg(not(feature = "cache"))]
-        Ok(parse()?)
+        parse()
     }
 }
