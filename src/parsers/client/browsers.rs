@@ -59,7 +59,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         // ensure chromium is the last result
         possible_results.sort_by_key(|x| x.0 == "Chromium");
 
-        if let Some((brand_version, brand_result)) = possible_results.get(0).map(|x| (x.1, x.2)) {
+        if let Some((brand_version, brand_result)) = possible_results.first().map(|x| (x.1, x.2)) {
             let version = if let Some(ua_full_version) = &client_hints.ua_full_version {
                 Some(ua_full_version.to_owned())
             } else {
