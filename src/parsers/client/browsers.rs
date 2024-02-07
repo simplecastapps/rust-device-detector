@@ -89,21 +89,11 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
         if let Some(client_hints_version) = &client_from_hints.version {
             // If the version reported from the client hints is YYYY or YYYY.MM (e.g., 2022 or 2022.04), then it's Iridium.
             // https://iridiumbrowser.de/news/
-            let iridium = ["2020", "2021", "2022", "2023"]
+            let iridium = ["2020", "2021", "2022", "2023", "2024"]
                 .iter()
                 .any(|year| client_hints_version.starts_with(year));
             if iridium {
                 client_from_hints.name = "Iridium".to_owned();
-                // client_from_hints.short = "I1".to_owned();
-
-                client_from_hints.engine = client_from_ua
-                    .as_ref()
-                    .map(|x| x.engine.clone())
-                    .unwrap_or_default();
-                client_from_hints.engine_version = client_from_ua
-                    .as_ref()
-                    .map(|x| x.engine_version.clone())
-                    .unwrap_or_default();
             }
         }
 
