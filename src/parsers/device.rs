@@ -284,7 +284,7 @@ pub fn lookup(
         if device.device_type.is_none() {
             static CHROME: Lazy<Regex> = static_user_agent_match!(r#"Chrome/[\.0-9]*"#);
             static SAFARI_PHONE: Lazy<Regex> =
-                static_user_agent_match!(r#"(?:Mobile|eliboM) Safari/"#);
+                static_user_agent_match!(r#"(?:Mobile|eliboM)"#);
             static SAFARI_TAB: Lazy<Regex> = static_user_agent_match!(r#"(?!Mobile )Safari"#);
             if let Some(family) = &os.family {
                 if family == "Android" && CHROME.is_match(&ua)? {
