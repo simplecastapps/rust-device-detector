@@ -7,7 +7,7 @@
 // use std::env;
 use std::process::ExitCode;
 
-use clap::Parser;
+use clap::{ArgAction, Parser};
 use std::net::{IpAddr, SocketAddr};
 
 use rust_device_detector::device_detector::DeviceDetector;
@@ -62,6 +62,15 @@ struct Args {
     /// Always remember escape shell arguments!
     #[arg(required_unless_present_any(["interactive", "server"]))]
     useragent: Option<String>,
+
+    // TODO we need to be able to just pass in a big block of headers as a single parameter
+    // so to make it easier to use without having to know headers ahead of time.
+    // we can even still cache if we filter out irrelevant headers and sort them.
+    /// Additional individual headers to pass to the detector. The user agent will NOT
+    /// be detected by passing it in this option. Furthermore, the cache will not be
+    /// bypassed when using this option because headers change all the time.
+    #[arg(short = 'H', long = "header", action = ArgAction::Append, value_name = "HEADER")]
+    headers: Option<Vec<String>>,
 
     /// Generate a basic test cases instead of the normal output.
     ///
@@ -132,7 +141,27 @@ async fn main() -> Result<(), ExitCode> {
 
             Some(ua) => {
                 // eprintln!("ua: {}", ua);
-                let headers = None;
+                // eprintln!("headers: {:?}", args.headers);
+                let headers: Option<Vec<(String, String)>> = match args.headers {
+                    Some(headers) => {
+                        headers
+                            .into_iter()
+                            .map(|x| {
+                                let mut split = x.split(":");
+                                // TODO FIXME handle all of these panics more cleanly.
+                                let name = split
+                                    .next()
+                                    .expect(&format!("Unable to parse header {}", x));
+                                let val = split
+                                    .next()
+                                    .expect(&format!("Unable to parse header {}", x));
+                                Some((name.to_owned(), val.trim_start().to_owned()))
+                            })
+                            .collect()
+                    }
+
+                    None => None,
+                };
 
                 let detection = detector
                     .parse(&ua, headers)

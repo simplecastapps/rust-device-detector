@@ -2,6 +2,7 @@ use anyhow::Result;
 use serde_yaml::Value;
 
 use crate::utils;
+use rust_device_detector::client_hints::ClientHint;
 
 use rust_device_detector::device_detector::Detection;
 
@@ -67,21 +68,12 @@ fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
         .as_str()
         .unwrap_or_else(|| panic!("missing user_agent, file: {}, case: {}", file_path, idx));
 
-    let headers: Option<Vec<(String, String)>> = value
+    let client_hints: Option<ClientHint> = value
         .get("headers")
         .and_then(|headers| headers.as_mapping())
-        .map(|headers| {
-            headers
-                .iter()
-                .map(|(k, v)| {
-                    let k: String = k.as_str().expect("a header").to_owned();
-                    let v: String = v.as_str().expect("a header value").to_owned();
-                    (k, v)
-                })
-                .collect::<Vec<_>>()
-        });
+        .and_then(|headers| utils::client_hint_mock(headers).ok());
 
-    let dd_res = dd.parse(ua, headers)?;
+    let dd_res = dd.parse_client_hints(ua, client_hints)?;
     assert!(!dd_res.is_bot(), "should not be a bot");
 
     basic_os(file_path, idx, ua, value, &dd_res)?;

@@ -566,17 +566,23 @@ impl DeviceDetector {
             cache: Cache::new(entries),
         }
     }
-
     pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
+        let client_hints = match headers {
+            Some(headers) => Some(ClientHint::from_headers(headers)?),
+            None => None,
+        };
+        self.parse_client_hints(ua, client_hints)
+    }
+
+    pub fn parse_client_hints(
+        &self,
+        ua: &str,
+        client_hints: Option<ClientHint>,
+    ) -> Result<Detection> {
         let parse = || {
             if let Some(bot) = bot::lookup_bot(ua)? {
                 return Ok(Detection::Bot(bot));
             }
-
-            let client_hints = match headers {
-                Some(headers) => Some(ClientHint::from_headers(headers)?),
-                None => None,
-            };
 
             let os = oss::lookup(ua, client_hints.as_ref())?;
 

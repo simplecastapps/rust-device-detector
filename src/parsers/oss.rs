@@ -28,6 +28,53 @@ static CLIENT_HINT_MAPPING: Lazy<Vec<(String, Vec<String>)>> = Lazy::new(|| {
 });
 static AVAILABLE_OSSES: Lazy<AvailableOSs> = Lazy::new(AvailableOSs::default);
 
+static FIRE_OS_VERSION: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
+    [
+        ("11", "8"),
+        ("10", "8"),
+        ("9", "7"),
+        ("7", "6"),
+        ("5", "5"),
+        ("4.4.3", "4.5.1"),
+        ("4.4.2", "4"),
+        ("4.2.2", "3"),
+        ("4.0.3", "3"),
+        ("4.0.2", "3"),
+        ("4", "2"),
+        ("2", "1"),
+    ]
+    .into_iter()
+    .collect::<HashMap<_, _>>()
+});
+
+static LINEAGE_OS_VERSION: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
+    [
+        ("14", "21"),
+        ("13", "20.0"),
+        ("12.1", "19.1"),
+        ("12", "19.0"),
+        ("11", "18.0"),
+        ("10", "17.0"),
+        ("9", "16.0"),
+        ("8.1.0", "15.1"),
+        ("8.0.0", "15.0"),
+        ("7.1.2", "14.1"),
+        ("7.1.1", "14.1"),
+        ("7.0", "14.0"),
+        ("6.0.1", "13.0"),
+        ("6.0", "13.0"),
+        ("5.1.1", "12.1"),
+        ("5.0.2", "12.0"),
+        ("5.0", "12.0"),
+        ("4.4.4", "11.0"),
+        ("4.3", "10.2"),
+        ("4.2.2", "10.1"),
+        ("4.0.4", "9.1.0"),
+    ]
+    .into_iter()
+    .collect::<HashMap<_, _>>()
+});
+
 #[derive(Clone, Debug, Default, Serialize)]
 pub struct OS {
     pub name: String,
@@ -109,27 +156,12 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
                         os_from_hints.version = None;
                     }
 
+                    if os_from_hints.name == "PICO OS" {
+                        os_from_hints.version = os_from_ua.version.clone();
+                    }
+
                     if os_from_hints.name == "Fire OS" {
                         if let Some(os_hint_version) = os_from_hints.version.as_deref() {
-                            static FIRE_OS_VERSION: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
-                                [
-                                    ("11", "8"),
-                                    ("10", "7"),
-                                    ("9", "7"),
-                                    ("7", "6"),
-                                    ("5", "5"),
-                                    ("4.4.3", "4.5.1"),
-                                    ("4.4.2", "4"),
-                                    ("4.2.2", "3"),
-                                    ("4.0.3", "3"),
-                                    ("4.0.2", "3"),
-                                    ("4", "2"),
-                                    ("2", "1"),
-                                ]
-                                .into_iter()
-                                .collect::<HashMap<_, _>>()
-                            });
-
                             let major_version = os_from_hints
                                 .version
                                 .as_ref()
@@ -194,6 +226,40 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
                 }
             }
         }
+
+        if os.name != "Lineage OS" {
+            if let Some(client_hints) = &client_hints {
+                if let Some("org.lineageos.jelly") = &client_hints.app.as_deref() {
+                    os.name = "Lineage OS".to_owned();
+                    os.family = Some("Android".to_owned());
+                    os.version = LINEAGE_OS_VERSION
+                        .get(os.version.as_deref().unwrap_or_else(|| {
+                            os.version
+                                .as_deref()
+                                .map(|x| x.split('.').last().unwrap_or("0"))
+                                .unwrap_or("0")
+                        }))
+                        .map(|x| (*x).to_owned());
+                }
+            }
+        }
+
+        if os.name != "Fire OS" {
+            if let Some(client_hints) = &client_hints {
+                if let Some("org.mozilla.tv.firefox") = &client_hints.app.as_deref() {
+                    os.name = "Fire OS".to_owned();
+                    os.family = Some("Android".to_owned());
+                    os.version = FIRE_OS_VERSION
+                        .get(os.version.as_deref().unwrap_or_else(|| {
+                            os.version
+                                .as_deref()
+                                .map(|x| x.split('.').next().unwrap_or("0"))
+                                .unwrap_or("0")
+                        }))
+                        .map(|x| (*x).to_owned());
+                }
+            }
+        }
     }
 
     Ok(res)
@@ -208,12 +274,20 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
                 return Ok(Some("ARM".into()));
             }
 
+            if arch.contains("loongarch64") {
+                return Ok(Some("LoongArch64".into()));
+            }
+
             if arch.contains("mips") {
                 return Ok(Some("MIPS".into()));
             }
 
             if arch.contains("sh4") {
                 return Ok(Some("SuperH".into()));
+            }
+
+            if arch.contains("sparc64") {
+                return Ok(Some("SPARC64".into()));
             }
 
             if arch.contains("x64") {
@@ -235,15 +309,21 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
     }
 
     static ARM_REG: Lazy<Regex> =
-        static_user_agent_match!("arm|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]");
+        static_user_agent_match!("arm|.*arm64|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]");
+    static LONGARCH64_REG: Lazy<Regex> = static_user_agent_match!("loongarch64");
     static MIPS_REG: Lazy<Regex> = static_user_agent_match!("mips");
     static SH4_REG: Lazy<Regex> = static_user_agent_match!("sh4");
+    static SPARC64_REG: Lazy<Regex> = static_user_agent_match!("sparc64");
     static X64_REG: Lazy<Regex> =
         static_user_agent_match!("64-?bit|WOW64|(?:Intel)?x64|WINDOWS_64|win64|amd64|x86_?64");
-    static X86_REG: Lazy<Regex> = static_user_agent_match!(".+32bit|.+win32|(?:i[0-9]|x)86|i86pc");
+    static X86_REG: Lazy<Regex> = static_user_agent_match!(".*32bit|.*win32|(?:i[0-9]|x)86|i86pc");
 
     if ARM_REG.is_match(ua)? {
         return Ok(Some("ARM".into()));
+    }
+
+    if LONGARCH64_REG.is_match(ua)? {
+        return Ok(Some("LoongArch64".into()));
     }
 
     if MIPS_REG.is_match(ua)? {
@@ -252,6 +332,10 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
 
     if SH4_REG.is_match(ua)? {
         return Ok(Some("SuperH".into()));
+    }
+
+    if SPARC64_REG.is_match(ua)? {
+        return Ok(Some("SPARC64".into()));
     }
 
     if X64_REG.is_match(ua)? {

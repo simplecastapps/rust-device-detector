@@ -33,11 +33,24 @@ static CLIENT_LIST: Lazy<BrowserClientList> = Lazy::new(|| {
 static CLIENT_HINT_MAPPING: Lazy<ClientHintMapping> = Lazy::new(|| {
     ClientHintMapping::new(vec![
         ("Chrome".to_owned(), vec!["Google Chrome".to_owned()]),
-        ("Vewd Browser".to_owned(), vec!["Vewd Core".to_owned()]),
+        (
+            "Chrome Webview".to_owned(),
+            vec!["Android WebView".to_owned()],
+        ),
         (
             "DuckDuckGo Privacy Browser".to_owned(),
             vec!["DuckDuckGo".to_owned()],
         ),
+        (
+            "Edge WebView".to_owned(),
+            vec!["Microsoft Edge WebView2".to_owned()],
+        ),
+        ("Microsoft Edge".to_owned(), vec!["Edge".to_owned()]),
+        (
+            "Norton Private Browser".to_owned(),
+            vec!["Norton Secure Browser".to_owned()],
+        ),
+        ("Vewd Browser".to_owned(), vec!["Vewd Core".to_owned()]),
     ])
 });
 
@@ -60,7 +73,7 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
             .collect()?;
 
         // ensure chromium is the last result
-        possible_results.sort_by_key(|x| x.0 == "Chromium");
+        possible_results.sort_by_key(|x| x.0 == "Chromium" || x.0 == "Microsoft Edge");
 
         if let Some((brand_version, brand_result)) = possible_results.first().map(|x| (x.1, x.2)) {
             let version = if let Some(ua_full_version) = &client_hints.ua_full_version {
@@ -94,6 +107,19 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
                 .any(|year| client_hints_version.starts_with(year));
             if iridium {
                 client_from_hints.name = "Iridium".to_owned();
+            }
+
+            // https://bbs.360.cn/thread-16096544-1-1.html
+            if let Some(ua_client) = &client_from_ua {
+                if let Some(ua_client_version) = &ua_client.version {
+                    if client_hints_version.starts_with("15")
+                        && ua_client_version.starts_with("114")
+                    {
+                        client_from_hints.name = "360 Secure Browser".to_owned();
+                        client_from_hints.engine = ua_client.engine.clone();
+                        client_from_hints.engine_version = ua_client.engine_version.clone();
+                    }
+                }
             }
         }
 
@@ -318,9 +344,9 @@ impl BrowserClientList {
             return Ok(None);
         }
 
-        if engine == "Gecko" {
+        if engine == "Gecko" || engine == "Clecko" {
             static GECKO_VERSION: Lazy<Regex> = Lazy::new(|| {
-                Regex::new(r#"(?i:[ ](?:rv[: ]([0-9\.]+)).*gecko/[0-9]{8,10})"#)
+                Regex::new(r#"(?i:[ ](?:rv[: ]([0-9\.]+)).*(?:g|cl)ecko/[0-9]{8,10})"#)
                     .expect("valid browser regex")
             });
 
@@ -334,6 +360,10 @@ impl BrowserClientList {
         let mut token = engine;
         if engine == "Blink" {
             token = "(?:Chrome|Cronet)";
+        } else if engine == "Arachne" {
+            token = "(?:Arachne\\/5\\.)";
+        } else if engine == "LibWeb" {
+            token = "(?:LibWeb\\+LibJs)";
         }
 
         use crate::parsers::utils::LimitedUserMatchRegex;

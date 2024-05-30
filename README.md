@@ -5,8 +5,8 @@ All tests are ported directly from that library and must all pass. It is intende
 this will be in lock step with upstream, though it is possible some user agents will
 be exist here that are not accepted upstream, this should be rare.
 
-The latest update commit from parent php project was (Feb 6 18:32:51 2024 +0300)
-https://github.com/matomo-org/device-detector/commit/f07a655ac9614be17c743e19ac9e4216920a2dab
+The latest update commit from parent php project was (Tue May 28 16:05:19 2024 +0300)
+https://github.com/matomo-org/device-detector/commit/8edc89ef5643295777041a7fad8249b0d538e745
 
 If you wish to contribute non code fixes, it is recommended that you contribute
 your patches and tests upstream, then request updates here to bring these projects into parity.
@@ -72,5 +72,5 @@ This will likely be added to crates.io once it has been proven in production and
 
 These changes are required before this could be considered for a 1.0 or be submitted to crates.io
 
-* Need ability to submit headers via commandline.
 * Ability to submit raw headers for commandline and http server mode, presumably with a user agent header within them.
+* Need ability to just send entire set of headers including user agent to standard in as well.

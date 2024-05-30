@@ -7,7 +7,7 @@ use once_cell::sync::OnceCell;
 
 #[derive(Debug)]
 pub(crate) struct LazyRegex {
-    pattern: String,
+    pub(crate) pattern: String,
     regex: OnceCell<SafeRegex>,
 }
 use std::collections::HashMap;
@@ -133,11 +133,8 @@ impl LimitedUserMatchRegex {
 macro_rules! static_user_agent_match {
     ($re:literal $(,)?) => {{
         Lazy::new(|| {
-            let reg = const_format::concatcp!(
-                r"(?i:^|[^A-Z0-9\-_]|[^A-Z0-9\-]_|sprd-|MZ-)(?i:",
-                $re,
-                r")"
-            );
+            let reg =
+                const_format::concatcp!(r"(?i:^|[^A-Z0-9_-]|[^A-Z0-9-]_|sprd-|MZ-)(?i:", $re, r")");
             // println!("static_user_agent_match compilation: {}", reg);
             Regex::new(reg).expect("static user agent match regex")
         })
@@ -146,7 +143,7 @@ macro_rules! static_user_agent_match {
 pub(crate) use static_user_agent_match;
 
 pub(crate) fn lazy_user_agent_match(pattern: &str) -> LazyRegex {
-    let mut reg = r"(?i:^|[^A-Z0-9\-_]|[^A-Z0-9\-]_|sprd-|MZ-)(?i:".to_owned();
+    let mut reg = r"(?i:^|[^A-Z0-9_-]|[^A-Z0-9-]_|sprd-|MZ-)(?i:".to_owned();
     reg.push_str(pattern.replace('/', r"\/").as_str());
     reg.push(')');
 

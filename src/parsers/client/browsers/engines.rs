@@ -23,6 +23,7 @@ static AVAILABLE_ENGINES: Lazy<Vec<String>> = Lazy::new(|| {
         "iCab",
         "Elektra",
         "Presto",
+        "Clecko",
         "Gecko",
         "KHTML",
         "NetFront",
@@ -31,6 +32,8 @@ static AVAILABLE_ENGINES: Lazy<Vec<String>> = Lazy::new(|| {
         "Servo",
         "Goanna",
         "EkiohFlow",
+        "Arachne",
+        "LibWeb",
     ];
     engines.into_iter().map(|x| x.to_owned()).collect()
 });

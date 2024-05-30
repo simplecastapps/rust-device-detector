@@ -5,6 +5,8 @@ use crate::utils;
 use std::fs::File;
 use std::io::BufReader;
 
+use rust_device_detector::client_hints::ClientHint;
+
 #[test]
 fn test_parser_browsers() -> Result<()> {
     let files: Vec<BufReader<File>> = vec![BufReader::new(
@@ -30,21 +32,12 @@ fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let test_client = value["client"].as_mapping().expect("client");
     let dd = &utils::DD;
 
-    let headers: Option<Vec<(String, String)>> = value
+    let client_hints: Option<ClientHint> = value
         .get("headers")
         .and_then(|headers| headers.as_mapping())
-        .map(|headers| {
-            headers
-                .iter()
-                .map(|(k, v)| {
-                    let k: String = k.as_str().expect("a header").to_owned();
-                    let v: String = v.as_str().expect("a header value").to_owned();
-                    (k, v)
-                })
-                .collect::<Vec<_>>()
-        });
+        .and_then(|headers| utils::client_hint_mock(headers).ok());
 
-    let dd_res = dd.parse(ua, headers)?;
+    let dd_res = dd.parse_client_hints(ua, client_hints)?;
 
     assert!(!dd_res.is_bot());
 

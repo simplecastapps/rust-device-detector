@@ -63,6 +63,8 @@ pub enum DeviceType {
     Peripheral,
 }
 
+static APPLE_OS_NAMES: [&str; 5] = ["iPadOS", "tvOS", "watchOS", "iOS", "Mac"];
+
 impl DeviceType {
     // these are used basically entirely for tests.
     pub fn as_str(&self) -> &'static str {
@@ -262,29 +264,37 @@ pub fn lookup(
 
     if let Some(os) = &os_info {
         if let Some(brand) = &device.brand {
-            if os.name == "Android" && brand == "Apple" {
+            if brand == "Apple" && !APPLE_OS_NAMES.iter().any(|x| *x == os.name) {
                 device.device_type = None;
                 device.brand = None;
                 device.model = None;
             }
-        } else if ["iPadOS", "tvOS", "watchOS", "iOS", "Mac"]
-            .iter()
-            .any(|x| *x == os.name)
-        {
-            device.brand = Some("Apple".to_owned());
+        }
+
+        if device.brand.is_none() {
+            if APPLE_OS_NAMES.iter().any(|x| *x == os.name) {
+                device.brand = Some("Apple".to_owned());
+            }
         }
     }
 
-    static VR: Lazy<Regex> = static_user_agent_match!(r#" VR "#);
-    if device.device_type.is_none() && VR.is_match(&ua)? {
+    static APAD_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Pad/APad"#);
+    static ANDROID_TABLET: Lazy<Regex> =
+        static_user_agent_match!(r#"Android( [\.0-9]+)?; Tablet;|Tablet(?! PC)|.*\-tablet$"#);
+    static ANDROID_MOBILE: Lazy<Regex> =
+        static_user_agent_match!(r#"Android( [\.0-9]+)?; Mobile;|.*\-mobile$"#);
+    static ANDROID_VR: Lazy<Regex> =
+        static_user_agent_match!(r#"Android( [\.0-9]+)?; Mobile VR;| VR "#);
+    static OPERA_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Opera Tablet"#);
+
+    if device.device_type.is_none() && ANDROID_VR.is_match(&ua)? {
         device.device_type = Some(DeviceType::Wearable);
     }
 
     if let Some(os) = &os_info {
         if device.device_type.is_none() {
             static CHROME: Lazy<Regex> = static_user_agent_match!(r#"Chrome/[\.0-9]*"#);
-            static SAFARI_PHONE: Lazy<Regex> =
-                static_user_agent_match!(r#"(?:Mobile|eliboM)"#);
+            static SAFARI_PHONE: Lazy<Regex> = static_user_agent_match!(r#"(?:Mobile|eliboM)"#);
             static SAFARI_TAB: Lazy<Regex> = static_user_agent_match!(r#"(?!Mobile )Safari"#);
             if let Some(family) = &os.family {
                 if family == "Android" && CHROME.is_match(&ua)? {
@@ -297,13 +307,6 @@ pub fn lookup(
             }
         }
     }
-
-    static APAD_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Pad/APad"#);
-    static ANDROID_TABLET: Lazy<Regex> =
-        static_user_agent_match!(r#"Android( [\.0-9]+)?; Tablet;"#);
-    static ANDROID_MOBILE: Lazy<Regex> =
-        static_user_agent_match!(r#"Android( [\.0-9]+)?; Mobile;"#);
-    static OPERA_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Opera Tablet"#);
 
     if device.device_type == Some(DeviceType::SmartPhone) && APAD_TABLET.is_match(&ua)? {
         device.device_type = Some(DeviceType::Tablet);
@@ -393,6 +396,10 @@ pub fn lookup(
             "Opera Devices",
             "Crow Browser",
             "Vewd Browser",
+            "TiviMate",
+            "Quick Search TV",
+            "QJY TV Browser",
+            "TV Bro",
         ]
         .iter()
         .any(|x| *x == client.name)
