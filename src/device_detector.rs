@@ -197,6 +197,7 @@ impl Detection {
             Detection::Known(known) => {
                 let is = serde_json::json!({
                     "desktop": known.is_desktop(),
+                    "notebook": known.is_notebook(),
                     "mobile": known.is_mobile(),
                     "touch_enabled": known.is_touch_enabled(),
                     "smart_phone": known.is_smart_phone(),
