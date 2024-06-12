@@ -196,31 +196,37 @@ impl Detection {
         match self {
             Detection::Known(known) => {
                 let is = serde_json::json!({
-                    "desktop": known.is_desktop(),
-                    "notebook": known.is_notebook(),
-                    "mobile": known.is_mobile(),
+
                     "touch_enabled": known.is_touch_enabled(),
-                    "smart_phone": known.is_smart_phone(),
-                    "feature_phone": known.is_feature_phone(),
+                    "mobile": known.is_mobile(),
+
+                    // TODO consider not emitting this stuff by default.
+                    // various client types (equivalent to eg. client.type == "browser")
                     "browser": known.is_browser(),
-                    "camera": known.is_camera(),
-                    // TODO rename from car
-                    "car_browser": known.is_car_browser(),
                     "feed_reader": known.is_feed_reader(),
-                    "console": known.is_console(),
                     "library": known.is_library(),
                     "media_player": known.is_media_player(),
-                    // TODO rename from portable_mp3
-                    "portable_media_player": known.is_portable_media_player(),
                     "mobile_app": known.is_mobile_app(),
+                    "pim": known.is_pim(),
+
+                    // various device types (eg. device.type == "smartphone")
+                    "desktop": known.is_desktop(),
+                    "notebook": known.is_notebook(),
+                    "smart_phone": known.is_smart_phone(),
+                    "feature_phone": known.is_feature_phone(),
+                    "camera": known.is_camera(),
+                    "car_browser": known.is_car_browser(),
+                    "console": known.is_console(),
+                    "portable_media_player": known.is_portable_media_player(),
                     "television": known.is_television(),
                     "smart_display": known.is_smart_display(),
                     "tablet": known.is_tablet(),
                     "smart_speaker": known.is_smart_speaker(),
-                    "pim": known.is_pim(),
                     "peripheral": known.is_peripheral(),
                     "wearable": known.is_wearable(),
                     "phablet": known.is_phablet(),
+
+                    // this should never have been emitted, is always false by this point.
                     "robot": false,
 
                 });
