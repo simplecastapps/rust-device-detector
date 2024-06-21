@@ -5,8 +5,8 @@ All tests are ported directly from that library and must all pass. It is intende
 this will be in lock step with upstream, though it is possible some user agents will
 be exist here that are not accepted upstream, this should be rare.
 
-The latest update commit from parent php project was (Tue May 28 16:05:19 2024 +0300)
-https://github.com/matomo-org/device-detector/commit/8edc89ef5643295777041a7fad8249b0d538e745
+The latest update commit from parent php project was (Fri Jun 21 16:41:08 2024 +0200)
+https://github.com/matomo-org/device-detector/commit/5e05e6735e9552a19b005ff17ab2c6a8090a940c
 
 If you wish to contribute non code fixes, it is recommended that you contribute
 your patches and tests upstream, then request updates here to bring these projects into parity.
