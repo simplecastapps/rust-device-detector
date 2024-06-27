@@ -1,6 +1,5 @@
 [package]
 name = "rust-device-detector"
-version = "0.6.0"
 edition = "2021"
 
 [dependencies]
