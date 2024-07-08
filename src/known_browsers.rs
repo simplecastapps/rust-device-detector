@@ -158,6 +158,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("VG", "AVG Secure Browser"),
         ("AC", "Avira Secure Browser"),
         ("A1", "AwoX"),
+        ("7A", "Awesomium"),
         ("5B", "Basic Web Browser"),
         ("BA", "Beaker Browser"),
         ("BM", "Beamrise"),
@@ -349,6 +350,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("I6", "iDesktop PC Browser"),
         ("IC", "iCab"),
         ("I2", "iCab Mobile"),
+        ("4I", "iNet Browser"),
         ("I1", "Iridium"),
         ("I3", "Iron Mobile"),
         ("I4", "IceCat"),
@@ -435,6 +437,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("MU", "MIUI Browser"),
         ("MS", "Mobile Silk"),
         ("MK", "Mogok Browser"),
+        ("M8", "Motorola Internet Browser"),
         ("MN", "Minimo"),
         ("MT", "Mint Browser"),
         ("MX", "Maxthon"),
@@ -510,6 +513,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("PL", "Palm Blazer"),
         ("PM", "Pale Moon"),
         ("PY", "Polypane"),
+        ("8P", "Prism"),
         ("PP", "Oppo Browser"),
         ("P6", "Opus Browser"),
         ("PR", "Palm Pre"),
@@ -541,6 +545,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("P0", "PronHub Browser"),
         ("PC", "PSI Secure Browser"),
         ("RW", "Reqwireless WebViewer"),
+        ("RO", "Roccat"),
         ("PS", "Microsoft Edge"),
         ("QA", "Qazweb"),
         ("QI", "Qiyu"),
@@ -624,6 +629,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("S4", "Steam In-Game Overlay"),
         ("ST", "Streamy"),
         ("SX", "Swiftfox"),
+        ("W7", "Swiftweasel"),
         ("SZ", "Seznam Browser"),
         ("W1", "Sweet Browser"),
         ("2X", "SX Browser"),
@@ -653,6 +659,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("UM", "UC Browser Mini"),
         ("UT", "UC Browser Turbo"),
         ("UI", "Ui Browser Mini"),
+        ("UP", "UPhone Browser"),
         ("UR", "UR Browser"),
         ("UZ", "Uzbl"),
         ("UE", "Ume Browser"),
@@ -670,6 +677,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("VB", "Vision Mobile Browser"),
         ("V4", "Vertex Surf"),
         ("VM", "VMware AirWatch"),
+        ("V6", "VMS Mosaic"),
         ("VK", "Vonkeror"),
         ("VU", "Vuhuv"),
         ("WI", "Wear Internet Browser"),
@@ -689,6 +697,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("WT", "WeTab Browser"),
         ("1W", "World Browser"),
         ("WL", "Wolvic"),
+        ("WK", "Wukong Browser"),
         ("WY", "Wyzo"),
         ("YG", "YAGI"),
         ("YJ", "Yahoo! Japan Browser"),
@@ -714,6 +723,7 @@ fn available_browsers() -> HashMap<String, String> {
         ("ZV", "Zvu"),
         ("ZI", "Zirco Browser"),
         ("ZR", "Zordo Browser"),
+        ("ZT", "ZTE Browser"),
     ]
     .into_iter()
     .map(|(short, name)| (short.to_owned(), name.to_owned()))
@@ -747,7 +757,7 @@ fn browser_families() -> HashMap<String, Vec<String>> {
                 "V4", "H4", "1T", "M5", "0S", "0C", "ZR", "D6", "F6", "RC", "WD", "P3", "FT", "A9",
                 "X2", "N3", "GD", "O9", "Q3", "F7", "K2", "P5", "H5", "V3", "K3", "Q4", "G2", "R2",
                 "WX", "XP", "3I", "BG", "R0", "JO", "OL", "GN", "W4", "QI", "E1", "RI", "8B", "5B",
-                "K4",
+                "K4", "WK",
             ],
         ),
         (
@@ -756,7 +766,7 @@ fn browser_families() -> HashMap<String, Vec<String>> {
                 "FF", "BI", "BF", "BH", "BN", "C0", "CU", "EI", "F1", "FB", "FE", "AX", "FM", "FR",
                 "FY", "GZ", "I4", "IF", "IW", "LH", "LY", "MB", "MN", "MO", "MY", "OA", "OS", "PI",
                 "PX", "QA", "S5", "SX", "TF", "TO", "WF", "ZV", "FP", "AD", "WL", "2I", "P9", "KJ",
-                "WY", "VK", "W5", "7C", "N7",
+                "WY", "VK", "W5", "7C", "N7", "W7", "8P",
             ],
         ),
         (
@@ -803,7 +813,7 @@ pub fn mobile_only_browsers() -> HashSet<String> {
         "ZR", "D6", "F6", "P3", "FT", "A9", "X2", "NI", "FG", "TH", "N3", "GD", "O9", "Q3", "F7",
         "K2", "N4", "P5", "H5", "V3", "G2", "BG", "OL", "II", "TL", "M6", "Y3", "M7", "GN", "D3",
         "IG", "HW", "4O", "OU", "5P", "KE", "5A", "TT", "6P", "G3", "7P", "VU", "F8", "L4", "DK",
-        "DP", "KL", "K4", "N6", "KU",
+        "DP", "KL", "K4", "N6", "KU", "WK", "M8", "UP", "ZT",
     ]
     .into_iter()
     .map(|f| f.to_owned())
