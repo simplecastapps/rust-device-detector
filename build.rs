@@ -1,5 +1,6 @@
+#[cfg(feature = "ffi")]
 extern crate cbindgen;
-
+#[cfg(feature = "ffi")]
 use std::env;
 
 // TODO parse and optimize yaml files into serde binary for faster
@@ -13,10 +14,11 @@ fn main() {
 
     // let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/regexes/bots.yml"));
     // let value: serde_yaml::Value = serde_yaml::from_str(contents).unwrap();
-
+    #[cfg(feature = "ffi")]
     build_cpp_header();
 }
 
+#[cfg(feature = "ffi")]
 fn build_cpp_header() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
 
