@@ -41,7 +41,7 @@ required-features = ["build-binary"]
 
 [features]
 default = []
-full = ["cache"]
+full = ["cache", "build-binary", "ffi"]
 # cache is a feature because moka brings in a lot of dependencies.
 cache = ["dep:moka"]
 ffi = ["dep:libc", "dep:cbindgen"]
