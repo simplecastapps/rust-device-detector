@@ -10,7 +10,7 @@ ENV RUSTUP_HOME=/home/app_user/.rustup \
     CARGO_TARGET_DIR=/home/app_user/target \
     PATH="/home/app_user/.cargo/bin:$PATH"
 
-RUN curl --proto  '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.71 && rustup default 1.71
+RUN curl --proto  '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain 1.75 && rustup default 1.75
 
 COPY Cargo.toml /app/Cargo.toml
 COPY Cargo.lock /app/Cargo.lock
