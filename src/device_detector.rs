@@ -8,7 +8,7 @@ use crate::parsers::device::DeviceType;
 use crate::parsers::{bot, client, device, oss};
 
 #[cfg(feature = "cache")]
-use moka::sync::Cache;
+use moka::future::Cache;
 
 pub use bot::Bot;
 
@@ -573,15 +573,15 @@ impl DeviceDetector {
             cache: Cache::new(entries),
         }
     }
-    pub fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
+    pub async fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
         let client_hints = match headers {
             Some(headers) => Some(ClientHint::from_headers(headers)?),
             None => None,
         };
-        self.parse_client_hints(ua, client_hints)
+        self.parse_client_hints(ua, client_hints).await
     }
 
-    pub fn parse_client_hints(
+    pub async fn parse_client_hints(
         &self,
         ua: &str,
         client_hints: Option<ClientHint>,
@@ -608,13 +608,13 @@ impl DeviceDetector {
                 return Ok(parse()?);
             }
 
-            if let Some(res) = self.cache.get(ua) {
+            if let Some(res) = self.cache.get(ua).await {
                 return Ok(res);
             };
 
             let known = parse()?;
 
-            self.cache.insert(ua.to_owned(), known.clone());
+            self.cache.insert(ua.to_owned(), known.clone()).await;
 
             Ok(known)
         }
