@@ -650,6 +650,16 @@ impl DeviceEntry {
         let res = if let Some(captures) = self.regex.captures(ua)? {
             if let Some(mut model) = self.model_match(ua)? {
                 let mut m = "".to_owned();
+
+                // php will treat $1[0-9]+ as $1 and so that bug constantly
+                // creeps into the php code because tests don't catch it.
+                // The fix inevitably comes down when someone reports it, but
+                // we can just fix the most common case here to side step the
+                // issue 99.999% of the time.
+                if model.model.contains("$10") {
+                  model.model = model.model.replace("$1", "${1}");
+                }
+
                 captures.expand(&model.model, &mut m);
                 model.model = m;
 
