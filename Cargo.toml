@@ -28,6 +28,7 @@ cbindgen = { version = "0.26", optional = true }
 stats_alloc = "0.1.1"
 futures = "0.3"
 glob = "0.3"
+tokio = { version = "1.38.0", features = ["test-util", "macros"] }
 
 # proc macro to iterate over yml files in tests, has to be own crate.
 test_each_file = { path = "test_each_file" }

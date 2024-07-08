@@ -3,11 +3,11 @@ use serde_yaml::Value;
 
 use crate::utils;
 
-pub(crate) fn basic(idx: usize, value: &Value) -> Result<()> {
+pub(crate) async fn basic(idx: usize, value: &Value) -> Result<()> {
     let ua = value["user_agent"].as_str().expect("user_agent");
     let test_bot = value["bot"].as_mapping().expect("bot");
     let dd = &utils::DD;
-    let dd_res = dd.parse(ua, None)?;
+    let dd_res = dd.parse(ua, None).await?;
 
     assert!(
         dd_res.is_bot(),

@@ -3,8 +3,8 @@ use serde_yaml::Value;
 
 use crate::utils;
 
-#[test]
-fn test_parser_notebooks() -> Result<()> {
+#[tokio::test]
+async fn test_parser_notebooks() -> Result<()> {
     let files = utils::files("tests/data/fixtures/parser/device/notebook.yml")?;
 
     assert!(!files.is_empty(), "expected at least one file");
@@ -14,18 +14,18 @@ fn test_parser_notebooks() -> Result<()> {
         let cases = cases.as_sequence_mut().expect("sequence");
 
         for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
+            basic(i + 1, case).await.expect("basic test");
         }
     }
 
     Ok(())
 }
 
-fn basic(idx: usize, value: &mut Value) -> Result<()> {
+async fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let ua = value["user_agent"].as_str().expect("user_agent");
     let test_device = value["device"].as_mapping().expect("device");
     let dd = &utils::DD;
-    let dd_res = dd.parse(ua, None)?;
+    let dd_res = dd.parse(ua, None).await?;
 
     assert!(!dd_res.is_bot(), "expected not bot");
 

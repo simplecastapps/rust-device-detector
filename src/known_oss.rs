@@ -302,7 +302,10 @@ fn os_families() -> HashMap<String, Vec<String>> {
         ),
         ("WebTV", vec!["WTV"]),
         ("Windows", vec!["WIN"]),
-        ("Windows Mobile", vec!["WPH", "WMO", "WCE", "WRT", "WIO", "KIN"]),
+        (
+            "Windows Mobile",
+            vec!["WPH", "WMO", "WCE", "WRT", "WIO", "KIN"],
+        ),
         ("Other Smart TV", vec!["WHS"]),
     ]
     .into_iter()

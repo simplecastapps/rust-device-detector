@@ -1,4 +1,6 @@
 use anyhow::Result;
+#[cfg(feature = "cache")]
+use std::sync::Arc;
 
 use serde::Serialize;
 
@@ -540,14 +542,12 @@ impl KnownDevice {
 // use std::alloc::System;
 
 #[cfg(feature = "cache")]
-type DetectionCache = Cache<String, Detection>;
+type DetectionCache = Arc<Cache<String, Detection>>;
 
 #[derive(Clone)]
 pub struct DeviceDetector {
     #[cfg(feature = "cache")]
-    caching: bool,
-    #[cfg(feature = "cache")]
-    cache: DetectionCache,
+    cache: Option<DetectionCache>,
 }
 
 impl DeviceDetector {
@@ -560,20 +560,18 @@ impl DeviceDetector {
     #[cfg(feature = "cache")]
     #[allow(clippy::new_without_default)]
     pub fn new() -> Self {
-        Self {
-            caching: false,
-            cache: Cache::new(0),
-        }
+        Self { cache: None }
     }
 
     #[cfg(feature = "cache")]
-    pub fn new_with_cache(entries: u64) -> Self {
-        Self {
-            caching: true,
-            cache: Cache::new(entries),
-        }
+    pub fn new_with_cache(cache: DetectionCache) -> Self {
+        Self { cache: Some(cache) }
     }
-    pub async fn parse(&self, ua: &str, headers: Option<Vec<(String, String)>>) -> Result<Detection> {
+    pub async fn parse(
+        &self,
+        ua: &str,
+        headers: Option<Vec<(String, String)>>,
+    ) -> Result<Detection> {
         let client_hints = match headers {
             Some(headers) => Some(ClientHint::from_headers(headers)?),
             None => None,
@@ -604,19 +602,23 @@ impl DeviceDetector {
 
         #[cfg(feature = "cache")]
         {
-            if !self.caching {
-                return Ok(parse()?);
+            match &self.cache {
+                Some(cache) => {
+                    let result = cache.get(ua).await;
+
+                    match result {
+                        Some(res) => return Ok(res),
+                        None => {
+                            let known = parse()?;
+
+                            cache.insert(ua.to_owned(), known.clone()).await;
+
+                            Ok(known)
+                        }
+                    }
+                }
+                None => Ok(parse()?),
             }
-
-            if let Some(res) = self.cache.get(ua).await {
-                return Ok(res);
-            };
-
-            let known = parse()?;
-
-            self.cache.insert(ua.to_owned(), known.clone()).await;
-
-            Ok(known)
         }
 
         #[cfg(not(feature = "cache"))]

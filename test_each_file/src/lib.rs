@@ -119,9 +119,9 @@ fn generate_from_tree(tree: &Paths, parsed: &ForEachFile, stream: &mut TokenStre
         };
 
         stream.extend(quote! {
-            #[test]
-            fn #file_name() {
-                (#function)(#file_name_str, #content)
+            #[tokio::test]
+            async fn #file_name() {
+                (#function)(#file_name_str, #content).await
             }
         });
     }

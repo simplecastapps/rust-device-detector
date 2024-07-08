@@ -3,8 +3,8 @@ use serde_yaml::Value;
 
 use crate::utils;
 
-#[test]
-fn test_vendorfragments() -> Result<()> {
+#[tokio::test]
+async fn test_vendorfragments() -> Result<()> {
     let files = utils::files("tests/data/fixtures/parser/vendorfragments.yml")?;
 
     assert!(!files.is_empty(), "expected at least one file");
@@ -14,18 +14,18 @@ fn test_vendorfragments() -> Result<()> {
         let cases = cases.as_sequence_mut().expect("sequence");
 
         for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
+            basic(i + 1, case).await.expect("basic test");
         }
     }
 
     Ok(())
 }
 
-fn basic(idx: usize, value: &mut Value) -> Result<()> {
+async fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let ua = value["useragent"].as_str().expect("user_agent");
     let test_vendor = value["vendor"].as_str().expect("vendor");
     let dd = &utils::DD;
-    let dd_res = dd.parse(ua, None)?;
+    let dd_res = dd.parse(ua, None).await?;
 
     let dd_brand: &str = dd_res
         .get_known_device()
