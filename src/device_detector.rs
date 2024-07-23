@@ -1,7 +1,7 @@
 use anyhow::Result;
 #[cfg(feature = "cache")]
 use std::sync::Arc;
-
+use get_size::GetSize;
 use serde::Serialize;
 
 use crate::client_hints::ClientHint;
@@ -16,13 +16,13 @@ pub use bot::Bot;
 
 // TODO we should Box KnownDevice as it is much larger than Bot
 #[allow(clippy::large_enum_variant)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, GetSize)]
 pub enum Detection {
     Known(KnownDevice),
     Bot(Bot),
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, GetSize)]
 pub struct KnownDevice {
     pub client: Option<client::Client>,
     pub device: Option<device::Device>,
