@@ -24,6 +24,9 @@ Any contributions to fix reproducible inaccuracies or improve performance are gr
 ```
 
 # Usage
+
+Assuming you have compiled with `cargo build --features=build-binary`:
+
 ```shell
 > rust-device-detector --help
 ```
