@@ -1894,7 +1894,7 @@
   device:
     type: tv
     brand: YASIN
-    model: ""
+    model: "2K Smart TV"
   os_family: Android
   browser_family: Chrome
 -
@@ -4609,8 +4609,8 @@
     type: browser
     name: LG Browser
     version: 8.00.00
-    engine: WebKit
-    engine_version: "537.36"
+    engine: Blink
+    engine_version: 38.0.2125.122
   device:
     type: tv
     brand: LG
@@ -8032,7 +8032,7 @@
   device:
     type: tv
     brand: Gazer
-    model: ""
+    model: Smart TV
   os_family: Android
   browser_family: Unknown
 -
