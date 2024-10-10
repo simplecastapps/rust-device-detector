@@ -47,6 +47,7 @@ pub struct ClientHint {
     pub platform_version: Option<String>,
     pub full_version_list: Vec<(String, String)>,
     pub app: Option<String>,
+    pub form_factors: Vec<String>,
 }
 
 impl ClientHint {
@@ -59,11 +60,14 @@ impl ClientHint {
         let mut platform = None;
         let mut platform_version = None;
         let mut app = None;
-
+        let mut form_factors: Vec<String> = Vec::new();
         let mut full_version_list: Vec<(String, String)> = Vec::new();
 
         static BRAND_REGEX: Lazy<Regex> =
             Lazy::new(|| Regex::new(r#""([^"]+)"; ?v="([^"]+)"?"#).unwrap());
+
+        static FORM_FACTOR_REGEX: Lazy<Regex> =
+            Lazy::new(|| Regex::new(r#"~"([a-z]+)"~i"#).unwrap());
 
         // println!("headers: {:?}", headers);
         for (header, value) in headers {
@@ -137,6 +141,14 @@ impl ClientHint {
                         full_version_list.push((brand.to_owned(), brand_version.to_owned()));
                     }
                 }
+
+                "sec-ch-ua-form-factors" => {
+                    form_factors = FORM_FACTOR_REGEX
+                        .captures_iter(&value)
+                        .filter_map(|x| x.ok()?.get(1).map(|x| x.as_str().to_lowercase()))
+                        .collect();
+                }
+
                 _ => {}
             }
         }
@@ -151,6 +163,7 @@ impl ClientHint {
             platform_version,
             full_version_list,
             app,
+            form_factors,
         };
 
         // println!("client hints: {:?}", res);

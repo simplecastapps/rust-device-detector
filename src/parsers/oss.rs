@@ -308,8 +308,9 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
         }
     }
 
-    static ARM_REG: Lazy<Regex> =
-        static_user_agent_match!("arm[ _;)ev]|.*arm$|.*arm64|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]");
+    static ARM_REG: Lazy<Regex> = static_user_agent_match!(
+        "arm[ _;)ev]|.*arm$|.*arm64|aarch64|Apple ?TV|Watch ?OS|Watch1,[12]"
+    );
     static LONGARCH64_REG: Lazy<Regex> = static_user_agent_match!("loongarch64");
     static MIPS_REG: Lazy<Regex> = static_user_agent_match!("mips");
     static SH4_REG: Lazy<Regex> = static_user_agent_match!("sh4");
