@@ -67,11 +67,12 @@ impl ClientHint {
             Lazy::new(|| Regex::new(r#""([^"]+)"; ?v="([^"]+)"?"#).unwrap());
 
         static FORM_FACTOR_REGEX: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r#"~"([a-z]+)"~i"#).unwrap());
+            Lazy::new(|| Regex::new(r#""([A-za-z]+)""#).unwrap());
 
         // println!("headers: {:?}", headers);
         for (header, value) in headers {
             let header = header.replace('_', "-").to_lowercase();
+
             match header.trim() {
                 "sec-ch-ua-arch" => {
                     architecture = Some(value.trim_matches('"').to_owned());
