@@ -384,7 +384,7 @@ impl BrowserClientList {
 
         let mut token = engine;
         if engine == "Blink" {
-            token = "(?:Chrome|Cronet)";
+            token = "(?:Chr[o0]me|Cronet)";
         } else if engine == "Arachne" {
             token = "(?:Arachne\\/5\\.)";
         } else if engine == "LibWeb" {
