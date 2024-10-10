@@ -287,6 +287,11 @@ pub fn lookup(
         static_user_agent_match!(r#"Android( [\.0-9]+)?; Mobile VR;| VR "#);
     static OPERA_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Opera Tablet"#);
 
+    static PUFFIN_DESKTOP: Lazy<Regex> = static_user_agent_match!(r#"Puffin/(?:\d+[.\d]+)[LMW]D"#);
+    static PUFFIN_SMARTPHONE: Lazy<Regex> =
+        static_user_agent_match!(r#"Puffin/(?:\d+[.\d]+)[AIFLW]P"#);
+    static PUFFIN_TABLET: Lazy<Regex> = static_user_agent_match!(r#"Puffin/(?:\d+[.\d]+)[AILW]T"#);
+
     if device.device_type.is_none() && ANDROID_VR.is_match(&ua)? {
         device.device_type = Some(DeviceType::Wearable);
     }
@@ -353,6 +358,18 @@ pub fn lookup(
             device.device_type = Some(DeviceType::FeaturePhone);
         }
 
+        if device.device_type.is_none() && PUFFIN_DESKTOP.is_match(&ua)? {
+            device.device_type = Some(DeviceType::Desktop);
+        }
+
+        if device.device_type.is_none() && PUFFIN_SMARTPHONE.is_match(&ua)? {
+            device.device_type = Some(DeviceType::SmartPhone);
+        }
+
+        if device.device_type.is_none() && PUFFIN_TABLET.is_match(&ua)? {
+            device.device_type = Some(DeviceType::Tablet);
+        }
+
         if device.device_type.is_none() {
             if os.name == "Windows RT" {
                 device.device_type = Some(DeviceType::Tablet);
@@ -370,8 +387,9 @@ pub fn lookup(
     }
 
     static OPERA: Lazy<Regex> = static_user_agent_match!(r#"Opera TV Store| OMI/"#);
-    static ANDR0ID: Lazy<Regex> =
-        static_user_agent_match!(r#"Andr0id|(?:Android(?: UHD)?|Google) TV|\(lite\) TV|BRAVIA'"#);
+    static ANDR0ID: Lazy<Regex> = static_user_agent_match!(
+        r#"Andr0id|(?:Android(?: UHD)?|Google) TV|\(lite\) TV|BRAVIA| TV$"#
+    );
     static TIZEN: Lazy<Regex> = static_user_agent_match!(r#"SmartTV|Tizen.+ TV .+$"#);
     static GENERIC_TV: Lazy<Regex> = static_user_agent_match!(r#"\(TV;"#);
 
@@ -657,7 +675,7 @@ impl DeviceEntry {
                 // we can just fix the most common case here to side step the
                 // issue 99.999% of the time.
                 if model.model.contains("$10") {
-                  model.model = model.model.replace("$1", "${1}");
+                    model.model = model.model.replace("$1", "${1}");
                 }
 
                 captures.expand(&model.model, &mut m);

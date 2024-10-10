@@ -241,6 +241,8 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
 
     if let Some(client) = &mut res {
         if let Some(engine) = &client.engine {
+            let engine = engine.clone();
+
             if engine == "Blink" && client.name == "Flow Browser" {
                 client.engine_version = None;
             }
@@ -248,6 +250,29 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<Clie
             if client.name == "Every Browser" {
                 client.engine = Some("Blink".to_owned());
                 client.engine_version = None;
+            }
+
+            if engine == "Gecko" && client.name == "TV-Browser Internet" {
+                client
+                    .browser
+                    .as_mut()
+                    .map(|x| x.family = Some("Chrome".to_owned()));
+                client.engine = Some("Blink".to_owned());
+                client.engine_version = None;
+            }
+
+            if engine == "Blink" && client.name == "Wolvic" {
+                client
+                    .browser
+                    .as_mut()
+                    .map(|x| x.family = Some("Chrome".to_owned()));
+            }
+
+            if engine == "Gecko" && client.name == "Wolvic" {
+                client
+                    .browser
+                    .as_mut()
+                    .map(|x| x.family = Some("Firefox".to_owned()));
             }
         }
     }
@@ -359,7 +384,7 @@ impl BrowserClientList {
 
         let mut token = engine;
         if engine == "Blink" {
-            token = "(?:Chrome|Cronet)";
+            token = "(?:Chr[o0]me|Cronet)";
         } else if engine == "Arachne" {
             token = "(?:Arachne\\/5\\.)";
         } else if engine == "LibWeb" {
