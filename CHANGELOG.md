@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.0] - 2024-10-14
+
+### 🚀 Features
+
+- Add new regex for `ZEIT ONLINE`
+
+### ⚙️  Miscellaneous Tasks
+
+- Update docs about building test binary
+
 ## [0.7.6] - 2024-07-08
 
 ### 🚀 Features
