@@ -1957,7 +1957,7 @@
     platform: ""
   client:
     type: mobile app
-    name: ZEIT ONLINE
+    name: ZONApp
     version: "2.5.6"
   device:
     type: smartphone
@@ -1973,7 +1973,7 @@
     platform: ""
   client:
     type: mobile app
-    name: ZEIT ONLINE
+    name: ZONApp
     version: "2.2.7"
   device:
     type: smartphone

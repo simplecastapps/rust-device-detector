@@ -2504,5 +2504,5 @@
 
 # ZEIT-Online app https://www.zeit.de/administratives/zeit-online-app-ios-android
 - regex: 'ZONApp/(?:iOS|Android)/([\d\.]+)'
-  name: 'ZEIT ONLINE'
+  name: 'ZONApp'
   version: '$1'
