@@ -2,11 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.8.2] 2024-10-23
+
+### 🚜 Refactor
+
+- Update `ZONApp` to `ZON App`
+
+### ⚙️ Miscellaneous Tasks
+
+- Update git-cliff config
+
 ## [0.8.1] - 2024-10-22
 
 ### 🚜 Refactor
 
 - Update `ZEIT ONLINE` name to `ZONApp`
+
+### ⚙️ Miscellaneous Tasks
+
+- Update changelog for release
 
 ## [0.8.0] - 2024-10-14
 
