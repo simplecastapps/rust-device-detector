@@ -401,15 +401,14 @@ impl BrowserClientList {
                 .unwrap_or(Ordering::Equal)
         });
 
-        engine_versions
-            .into_iter()
-            .for_each(|(engine_version, eng)| {
-                if let Cmp::Eq | Cmp::Gt =
-                    version_compare::compare(version, engine_version).expect("valid version")
-                {
-                    engine = Some(eng.clone())
+        for (engine_version, eng) in &engine_versions {
+            match version_compare::compare(version, engine_version) {
+                Ok(Cmp::Eq) | Ok(Cmp::Gt) => {
+                    engine = Some(eng.to_string());
                 }
-            });
+                _ => {}
+            }
+        }
 
         engine = engine.or_else(|| entry_engine.default.clone());
 
