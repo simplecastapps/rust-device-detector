@@ -37,31 +37,31 @@ test_each_file! { in "./tests/data/fixtures/" => base_fixture_tests }
 //    Ok(())
 //}
 //
-fn base_fixture_tests(file_path: &str, contents: &str) {
+async fn base_fixture_tests(file_path: &str, contents: &str) {
     let mut cases: Value = serde_yaml::from_str(contents).expect("valid test yaml");
 
     let cases = cases.as_sequence_mut().expect("sequence");
 
     for (i, case) in cases.into_iter().enumerate() {
-        basic(file_path, i + 1, case).expect("basic test");
+        basic(file_path, i + 1, case).await.expect("basic test");
     }
 }
 
-fn basic(test_file: &str, idx: usize, value: &Value) -> Result<()> {
+async fn basic(test_file: &str, idx: usize, value: &Value) -> Result<()> {
     if value
         .as_mapping()
         .map(|m| m.contains_key("bot"))
         .unwrap_or(false)
     {
-        crate::bots::basic(idx, value)?;
+        crate::bots::basic(idx, value).await?;
     } else {
-        basic_known(test_file, idx, value)?;
+        basic_known(test_file, idx, value).await?;
     }
 
     Ok(())
 }
 
-fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
+async fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
     let dd = &utils::DD;
 
     let ua = value["user_agent"]
@@ -73,7 +73,7 @@ fn basic_known(file_path: &str, idx: usize, value: &Value) -> Result<()> {
         .and_then(|headers| headers.as_mapping())
         .and_then(|headers| utils::client_hint_mock(headers).ok());
 
-    let dd_res = dd.parse_client_hints(ua, client_hints)?;
+    let dd_res = dd.parse_client_hints(ua, client_hints).await?;
     assert!(!dd_res.is_bot(), "should not be a bot");
 
     basic_os(file_path, idx, ua, value, &dd_res)?;

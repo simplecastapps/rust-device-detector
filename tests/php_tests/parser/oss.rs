@@ -4,8 +4,8 @@ use serde_yaml::Value;
 use crate::utils;
 use rust_device_detector::client_hints::ClientHint;
 
-#[test]
-fn test_oss() -> Result<()> {
+#[tokio::test]
+async fn test_oss() -> Result<()> {
     let files = utils::files("tests/data/fixtures/parser/oss.yml")?;
 
     assert!(!files.is_empty(), "expected at least one file");
@@ -15,14 +15,14 @@ fn test_oss() -> Result<()> {
         let cases = cases.as_sequence_mut().expect("sequence");
 
         for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
+            basic(i + 1, case).await.expect("basic test");
         }
     }
 
     Ok(())
 }
 
-fn basic(idx: usize, value: &mut Value) -> Result<()> {
+async fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let ua = value["user_agent"].as_str().expect("user_agent");
     let test_os = value["os"].as_mapping().expect("os");
     let dd = &utils::DD;
@@ -32,7 +32,7 @@ fn basic(idx: usize, value: &mut Value) -> Result<()> {
         .and_then(|headers| headers.as_mapping())
         .and_then(|headers| utils::client_hint_mock(headers).ok());
 
-    let dd_res = dd.parse_client_hints(ua, client_hints)?;
+    let dd_res = dd.parse_client_hints(ua, client_hints).await?;
 
     assert!(!dd_res.is_bot());
 
