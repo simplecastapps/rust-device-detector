@@ -3,8 +3,8 @@ use serde_yaml::Value;
 
 use crate::utils;
 
-#[test]
-fn test_type_methods() -> Result<()> {
+#[tokio::test]
+async fn test_type_methods() -> Result<()> {
     let files = utils::files("tests/data/fixtures/parser/type-methods.yml")?;
 
     assert!(!files.is_empty(), "expected at least one file");
@@ -14,19 +14,19 @@ fn test_type_methods() -> Result<()> {
         let cases = cases.as_sequence_mut().expect("sequence");
 
         for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
+            basic(i + 1, case).await.expect("basic test");
         }
     }
 
     Ok(())
 }
 
-fn basic(idx: usize, value: &mut Value) -> Result<()> {
+async fn basic(idx: usize, value: &mut Value) -> Result<()> {
     let ua = value["user_agent"].as_str().expect("user_agent");
     let test_checks = value["check"].as_sequence().expect("checks");
 
     let dd = &utils::DD;
-    let dd_res = dd.parse(ua, None)?;
+    let dd_res = dd.parse(ua, None).await?;
 
     let test_bot = test_checks[0].as_bool().expect("bot");
     let dd_bot = dd_res.is_bot();

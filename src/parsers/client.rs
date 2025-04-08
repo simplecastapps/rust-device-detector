@@ -18,7 +18,7 @@
 //
 
 use anyhow::Result;
-
+use get_size::GetSize;
 use serde::{Deserialize, Serialize};
 
 use serde::de::Deserializer;
@@ -37,7 +37,7 @@ pub mod pim;
 use crate::client_hints::ClientHint;
 
 #[repr(C)]
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, GetSize)]
 pub enum ClientType {
     #[serde(rename = "browser")]
     Browser,
@@ -66,7 +66,7 @@ impl ClientType {
     }
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, GetSize)]
 pub struct Client {
     pub name: String,
     pub version: Option<String>,

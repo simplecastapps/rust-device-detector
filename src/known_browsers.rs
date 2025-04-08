@@ -1,5 +1,5 @@
 use std::collections::{HashMap, HashSet};
-
+use get_size::GetSize;
 use serde::Serialize;
 
 // These are the known browsers from matamo's device detector. While this
@@ -12,7 +12,7 @@ pub struct AvailableBrowsers {
     browsers_by_name: HashMap<String, AvailableBrowser>,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, GetSize)]
 pub struct AvailableBrowser {
     pub name: String,
     pub family: Option<String>,

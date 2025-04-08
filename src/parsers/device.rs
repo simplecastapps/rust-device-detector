@@ -11,7 +11,7 @@ use version_compare::{self, Version};
 use super::vendor_fragments;
 
 use std::borrow::Cow;
-
+use get_size::GetSize;
 use crate::client_hints::ClientHint;
 use crate::parsers::client::{Client, ClientType};
 use crate::parsers::oss::OS;
@@ -29,7 +29,7 @@ pub mod portable_media_players;
 pub mod shell_tvs;
 pub mod televisions;
 
-#[derive(Debug, PartialEq, Eq, Clone, Serialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, GetSize)]
 pub enum DeviceType {
     #[serde(rename = "desktop")]
     Desktop,
@@ -108,7 +108,7 @@ impl DeviceType {
     }
 }
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize, GetSize)]
 pub struct Device {
     #[serde(rename = "type")]
     pub device_type: Option<DeviceType>,

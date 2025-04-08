@@ -1,5 +1,5 @@
 use anyhow::Result;
-
+use get_size::GetSize;
 use serde::Deserialize;
 
 use once_cell::sync::Lazy;
@@ -16,7 +16,7 @@ pub fn lookup_bot(ua: &str) -> Result<Option<Bot>> {
     BOT_LIST.lookup(ua)
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Serialize, GetSize)]
 pub struct Bot {
     pub name: String,
     pub category: Option<String>,
@@ -24,7 +24,7 @@ pub struct Bot {
     pub producer: Option<BotProducer>,
 }
 
-#[derive(Debug, Deserialize, Clone, Serialize)]
+#[derive(Debug, Deserialize, Clone, Serialize, GetSize)]
 pub struct BotProducer {
     pub name: Option<String>,
     pub url: Option<String>,

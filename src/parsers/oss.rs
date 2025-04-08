@@ -6,7 +6,7 @@ use serde_yaml::Value;
 use serde::{Deserialize, Serialize};
 
 use std::collections::HashMap;
-
+use get_size::GetSize;
 use crate::client_hints::ClientHint;
 use crate::known_oss::AvailableOSs;
 use crate::parsers::utils::{
@@ -75,7 +75,7 @@ static LINEAGE_OS_VERSION: Lazy<HashMap<&str, &str>> = Lazy::new(|| {
     .collect::<HashMap<_, _>>()
 });
 
-#[derive(Clone, Debug, Default, Serialize)]
+#[derive(Clone, Debug, Default, Serialize, GetSize)]
 pub struct OS {
     pub name: String,
     pub version: Option<String>,
