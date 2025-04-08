@@ -24538,6 +24538,32 @@ Amazon:
       model: ''
       device: 'tv'
 
+# Sonos (sonos.com)
+SONOS:
+  regex: '(?:Sonos/.+\((?:(?:BR|ZP).+)\)|Sonos;|Sonos/.+\(?:Arc|ANVIL|Play:\d\))'
+  device: 'smart speaker'
+  models:
+    - regex: '\((ZPS(?:[13569]|1[1-9]|2[0-467]|3[013-9]|4[1345]|5[45])|ZP(?:90|120))\)'
+      model: '$1'
+    - regex: 'Sonos;Beam;'
+      model: 'Beam'
+    - regex: 'BR200'
+      model: 'BOOST'
+    - regex: 'Sonos;Roam;'
+      model: 'Roam'
+    - regex: 'Sonos;Bookshelf;'
+      model: 'Bookshelf'
+    - regex: 'Sonos;Move;'
+      model: 'Move'
+    - regex: 'Play:?(\d)'
+      model: 'Play:$1'
+    - regex: 'Sonos;One;'
+      model: 'One'
+    - regex: 'Sonos;OneSL'
+      model: 'OneSL'
+    - regex: '\(ANVIL\)'
+      model: 'Sub'
+
 # Syco (https://www.sycomobiles.be/)
 Syco:
   regex: 'RS-403(?:[);/ ]|$)'
@@ -40948,6 +40974,482 @@ BYYBUO:
   models:
     - regex: 'SmartPad_(K7|T10)(?:_EU)?'
       model: 'SmartPad $1'
+
+# Haixu
+Haixu:
+  regex: 'Haixu[_ ]?([^;/)]+)( Build|[;)])'
+  device: 'smartphone'
+  model: '$1'
+
+# HONKUAHG
+HONKUAHG:
+  regex: ' (EV10)( Build|[;)])'
+  device: 'tablet'
+  model: '$1'
+
+# SWOFY (swofy.com.cn)
+SWOFY:
+  regex: 'SWOFY[_ ]'
+  device: 'portable media player'
+  models:
+    - regex: 'SWOFY[_ ]M503-Pro'
+      model: 'M503 Pro'
+
+# Moondrop (moondroplab.com)
+Moondrop:
+  regex: 'MD-PH-001(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: 'MIAD01'
+
+# Vision Technology (vision-ma.com)
+Vision Technology:
+  regex: 'LGE; VS-[0-9a-z]+;|XS100MINI(?:[);/ ]|$)'
+  device: 'tv'
+  models:
+    - regex: 'XS100MINI(?:[);/ ]|$)'
+      model: 'XS100 Mini'
+    - regex: 'LGE; (VS-[0-9a-z]+);'
+      model: '$1'
+
+# WOZIFAN (Ruzava/WOZIFAN)
+WOZIFAN:
+  regex: 'W10_EEA(?:[);/ ]|$)'
+  device: 'tablet'
+  model: 'W10'
+
+# Newal (newal.com.tr)
+Newal:
+  regex: 'NEWAL[_ ]?([^;/)]+)( Build|[;)])'
+  device: 'tv'
+  model: '$1'
+
+# Hanson
+Hanson:
+  regex: 'Hanson[_ ]?([^;/)]+)( Build|[;)])'
+  device: 'tablet'
+  model: '$1'
+
+# Tivax (tivax.com)
+Tivax:
+  regex: '(MiTraveler 958)'
+  device: 'tablet'
+  model: '$1'
+
+# Nordfrost (nordfrost.ru)
+Nordfrost:
+  regex: '(Y-(?:4301|4001)-FHD-R)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Ringing Bells
+Ringing Bells:
+  regex: 'RINGING BELLS'
+  device: 'smartphone'
+  models:
+    - regex: 'Smart 101'
+      model: 'Smart 101 4G'
+
+# Atouch
+Atouch:
+  regex: '(?:S-Tab10?|M-T[34])(?:[);/ ]|$)'
+  device: 'tablet'
+  models:
+    - regex: '(M-T[34])'
+      model: '$1'
+    - regex: 'S-Tab(10?)'
+      model: 'S-Tab$1'
+
+# Metz or METZ blue (https://metz-ce.de, https://metzblue.com)
+Metz:
+  regex: 'METZ 2K TV'
+  device: 'tv'
+  model: '2K Smart TV'
+
+# EGOTEK
+EGOTEK:
+  regex: '(EGO1003)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# ZZB or ZZB (cn)
+ZZB:
+  regex: '(ZB30)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# Dykemann (https://dykemann.ru/)
+Dykemann:
+  regex: 'Sternenschein (G-\d{2})(?:[);/ ]|$)' # projector
+  device: 'tv'
+  model: 'Sternenschein $1'
+
+# BYD or BYD Auto (https://www.byd.com/)
+BYD:
+  regex: 'For BYD AUTO'
+  device: 'car browser'
+  model: 'CarPad'
+
+# ROCH
+ROCH:
+  regex: '(RH-LE\d{2}DSY-C)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# DMOAO
+DMOAO:
+  regex: '(?:D3_EEA)(?:[);/ ]|$)'
+  device: 'tablet'
+  models:
+    - regex: '(D3)_EEA(?:[);/ ]|$)'
+      model: '$1'
+
+# Hyatta (hyatta.cn)
+Hyatta:
+  regex: 'Model[ _](5|6s)(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: 'Model $1'
+
+# PVBox
+PVBox:
+  regex: 'PVBOX_P5_PRO'
+  device: 'tv'
+  model: 'P5 Pro'
+
+# XREAL (xreal.com)
+XREAL:
+  regex: '(?:X4000)(?:[);/ ]|$)'
+  device: 'smartphone'
+  models:
+    - regex: 'X4000'
+      model: 'Beam Pro'
+
+# SENNA
+SENNA:
+  regex: '(?:SENNA_)?(32SN6000H)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# ATMPC
+ATMPC:
+  regex: '(IT)_(701A)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1-$2'
+
+# Jambo or Jambo Technology (www.jambo.technology, jambophone.xyz)
+Jambo:
+  regex: ' (?:JP1)( Build|[;)])'
+  device: 'smartphone'
+  model: 'JamboPhone'
+
+# LYOTECH LABS
+LYOTECH LABS:
+  regex: 'LFi ONE(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: 'LFi One'
+
+# MESWAO (https://meswao.com/)
+MESWAO:
+  regex: '(MES-B[13])(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# SERVO
+SERVO:
+  regex: '(?:SERVO 16MAX)(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: '16 Max'
+
+# COLORROOM
+COLORROOM:
+  regex: '(K10C)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# E-TACHI (https://e-tachimobile.com/)
+E-TACHI:
+  regex: '(?:A5SLIM)(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: 'A5 Slim'
+
+# CPDEVICE (https://cpdevice.com)
+CPDEVICE:
+  regex: 'APOLLO10 PRO(?:[);/ ]|$)'
+  device: 'car browser'
+  model: 'Apollo 10 Pro'
+
+# XPPen or XP-Pen (https://xp-pen.com)
+XPPen:
+  regex: '(?:MagicDrawingPad)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: 'Magic Drawing Pad'
+
+# Korax
+Korax:
+  regex: 'Korax[_ -]?([^;/)]+)( Build|[;)])'
+  device: 'tv'
+  model: '$1'
+
+# Ehlel (https://ehlel.com/)
+Ehlel:
+  regex: 'Ehlel[_ ]'
+  device: 'smartphone'
+  models:
+    - regex: 'Ehlel C7 PRO'
+      model: 'Modun C7 Pro'
+
+# Hemilton or HemiltonPro
+Hemilton:
+  regex: 'Tab1000(?:[);/ ]|$)'
+  device: 'tablet'
+  model: 'Pro Tab 1000'
+
+# Umiio
+Umiio:
+  regex: 'P60_Ultra_5G(?:[);/ ]|$)'
+  device: 'smartphone'
+  models:
+    - regex: 'P60_Ultra_5G'
+      model: 'P60 Ultra 5G'
+
+# Adreamer (Shenzhen) (adreamertech.com)
+Adreamer:
+  regex: 'LeoPad[_ ]10[XS]?(?:[);/ ]|$)'
+  device: 'tablet'
+  models:
+    - regex: 'LeoPad[_ ](10[XS])'
+      model: 'LeoPad $1'
+    - regex: 'LeoPad[_ ]10'
+      model: 'LeoPad 10'
+
+# RENSO (rensomobile.com)
+RENSO:
+  regex: '(?:NEP N(?:11?|9))(?:[);/ ]|$)'
+  device: 'smartphone'
+  models:
+    - regex: 'NEP N(11?|9)'
+      model: 'Nep N$1'
+
+
+# AZOM or AZOM TECH
+AZOM:
+  regex: 'AZOM[_ ]'
+  device: 'smartphone'
+  models:
+    - regex: 'River 1'
+      model: 'River 1'
+
+# DUDU AUTO (http://www.duduauto.top/)
+DUDU AUTO:
+  regex: 'DUDU(\d)'
+  device: 'car browser'
+  model: 'DUDU$1'
+
+# Temigereev
+Temigereev:
+  regex: 'TG ?(15|30)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: 'TG $1'
+
+# Biegedy
+Biegedy:
+  regex: 'B(2[1239])(?:_U)?_(?:EEA|US)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: 'B$1'
+
+# Blackphone
+Blackphone:
+  regex: '(?:BLACKPHONE_Blackphone_K330_3G)(?:[);/ ]|$)'
+  device: 'feature phone'
+  model: 'K330'
+
+# Blackton (https://blackton.tv)
+Blackton:
+  regex: 'Bt[_ -](\d{2}FSU?\d{2}B)(?:[);/ ]|$)'
+  device: 'tv'
+  model: 'Bt $1'
+
+# Eudora (https://eudoramobile.com/)
+Eudora:
+  regex: '(?:E65 Pro)(?:[);/ ]|$)'
+  device: 'smartphone'
+  model: 'E65 Pro'
+
+# Acepad (https://acepad.de/)
+Acepad:
+  regex: '(?:A130[_-]202[34])(?:[);/ ]|$)'
+  device: 'tablet'
+  models:
+    - regex: 'A130[_-](202[34])'
+      model: A130 ($1)
+
+# PLDT (AURA TECH LIMITED)
+PLDT:
+  regex: 'Aura[_ ]TELPAD[_ ]MT7'
+  device: 'tablet'
+  models:
+    - regex: 'Aura[_ ]TELPAD[_ ]MT7'  # tablet + stationary phone
+      device: 'peripheral'
+      model: 'TelPad MT7'
+
+# MEGAMAX
+MEGAMAX:
+  regex: 'MEGAMAX(?:_W_)?(\d{2}MG11FSM)'
+  device: 'tv'
+  model: '$1'
+
+# PrismPlus (prismplus.sg)
+PRISM+:
+  regex: 'PrismPlus'
+  device: 'tv'
+  models:
+    - regex: '(\d)K Pro Android TV'
+      model: '$1K Pro Smart TV'
+
+# SINGER (www.singersl.com)
+SINGER:
+  regex: 'SINGER'
+  device: 'tv'
+  models:
+    - regex: '4K GSMART TV'
+      model: '4K Smart TV'
+    - regex: 'SINGER ANDROID TV'
+      model: 'Smart TV'
+
+# Everfine
+Everfine:
+  regex: '(32EVF5000S)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Elista (www.elistaworld.com)
+Elista:
+  regex: '(B50UHD4EKC)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Horion (global.horion.com)
+Horion:
+  regex: '(WEE5-75EU-FDVB)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# ZIFFLER (ziffler.uz)
+ZIFFLER:
+  regex: '(65W600U)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Dora
+Dora:
+  regex: '(65DYW60)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Weston (weston.com.tr)
+Weston:
+  regex: '(65WS3205)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Viendo
+Viendo:
+  regex: '(V65G2)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# simfer (https://www.simfer.com.tr/)
+simfer:
+  regex: '(43SFSW4M)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# Stilevs (https://stilevskktc.com/)
+Stilevs:
+  regex: 'STILEVS|ST65SMWOS4K(?:[);/ ]|$)'
+  device: 'tv'
+  models:
+    - regex: 'ST65SMWOS4K'
+      model: 'ST65SMWOS4K'
+    - regex: 'STILEVS SMART TV(?:[);/ ]|$)'
+      model: 'Smart TV'
+
+# TV+ (https://tvplus.com.tr/)
+TV+:
+  regex: '(?:TVPLUS BOX)(?:[);/ ]|$)'
+  device: 'tv'
+  model: 'Smart TV'
+
+# G Guard (https://www.gguard.com/)
+G-Guard:
+  regex: 'G Guard'
+  device: 'tv'
+  models:
+    - regex: 'SMART TV'
+      model: 'Smart TV'
+
+# Altibox (https://www.altibox.no/)
+Altibox:
+  regex: 'Altibox'
+  device: 'tv'
+  model: 'Smart TV'
+
+# Supermax
+Supermax:
+  regex: 'Supermax'
+  device: 'tv'
+  models:
+    - regex: 'MX11 prime'
+      model: 'MX11 Prime'
+
+# WildRed
+WildRed:
+  regex: '(42QWS9001)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# LUO
+LUO:
+  regex: 'LU-(V78)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
+
+# hoco
+hoco:
+  regex: 'hoco[_ -]?([^;/)]+)( Build|[;)])'
+  device: 'tablet'
+  model: '$1'
+
+# SOWLY
+SOWLY:
+  regex: 'AG_1088_(A133P?|A523P)'
+  device: 'tablet'
+  model: '$1'
+
+# HAVIT (https://www.prohavit.com/)
+HAVIT:
+  regex: 'HAVIT'
+  device: 'peripheral'
+  models:
+    - regex: 'PJ209 PRO'  # Laser Projector
+      model: 'PJ209 Pro'
+
+# CONSUNG (http://www.consung.cn/)
+CONSUNG:
+  regex: '(N101[AB])(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# FONTEL (https://fontelphone.com/)
+FONTEL:
+  regex: '(FT1000|FT800)(?:[);/ ]|$)'
+  device: 'tablet'
+  model: '$1'
+
+# Romsat (romsat.ua)
+Romsat:
+  regex: '(43FSQ2020T2)(?:[);/ ]|$)'
+  device: 'tv'
+  model: '$1'
 
 # Devices with undectable brand, but detectable model
 Unknown:
