@@ -206,6 +206,7 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("RZD", "RazoDroiD"),
         ("SAB", "Sabayon"),
         ("SSE", "SUSE"),
+        ("OPS", "openSUSE"),
         ("SAF", "Sailfish OS"),
         ("SCI", "Scientific Linux"),
         ("SEE", "SeewoOS"),
@@ -254,6 +255,22 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("VIZ", "ViziOS"),
         ("AZU", "Azure Linux"),
         ("RIS", "risingOS"),
+        ("NTX", "NuttX"),
+        ("CON", "Contiki"),
+        ("MNX", "MINIX"),
+        ("PLN", "Plan 9"),
+        ("LPU", "Linpus"),
+        ("ARC", "ArcaOS"),
+        ("GHO", "GhostBSD"),
+        ("ELM", "elementary OS"),
+        ("MOS", "Mocor OS"),
+        ("TIT", "Titan OS"),
+        ("KOL", "KolibriOS"),
+        ("COL", "Coolita OS"),
+        ("ORS", "Orsay"),
+        ("SMA", "Smartisan OS"),
+        ("OHS", "OpenHarmony"),
+        ("BS1", "BSD"),
     ]
     .into_iter()
     .map(|(short, name)| (short.to_owned(), name.to_owned()))
@@ -267,6 +284,7 @@ fn os_families() -> HashMap<String, Vec<String>> {
             vec![
                 "AND", "CYN", "FIR", "REM", "RZD", "MLD", "MCD", "YNS", "GRI", "HAR", "ADR", "CLR",
                 "BOS", "REV", "LEN", "SIR", "RRS", "WER", "PIC", "ARM", "HEL", "BYI", "RIS", "PUF", "MET", "LEA",
+                "OHS", "SMA",
             ],
         ),
         ("AmigaOS", vec!["AMG", "MOR", "ARO"]),
@@ -277,7 +295,7 @@ fn os_families() -> HashMap<String, Vec<String>> {
         ("Firefox OS", vec!["FOS", "KOS"]),
         ("Gaming Console", vec!["WII", "PS3"]),
         ("Google TV", vec!["GTV"]),
-        ("IBM", vec!["OS2"]),
+        ("IBM", vec!["OS2", "ARC"]),
         ("iOS", vec!["IOS", "ATV", "WAS", "IPA"]),
         ("RISC OS", vec!["ROS"]),
         (
@@ -290,28 +308,29 @@ fn os_families() -> HashMap<String, Vec<String>> {
                 "TEN", "CST", "NOV", "ROU", "ZOR", "RED", "KAL", "ORA", "VID", "TIV", "BSN", "RAS",
                 "UOS", "PIO", "FRI", "LIR", "WEB", "SER", "ASP", "AOS", "LOO", "EUL", "SCI", "ALP",
                 "CLO", "ROC", "OVZ", "PVE", "RST", "EZX", "GNS", "JOL", "TUR", "QTP", "WPO", "PAN", "VIZ", "AZU",
+                "COL", "ELM", "LPU", "OPS",
             ],
         ),
         ("Mac", vec!["MAC"]),
         ("Mobile Gaming Console", vec!["PSP", "NDS", "XBX"]),
         ("OpenVMS", vec!["OVS"]),
-        ("Real-time OS", vec!["MTK", "TDX", "MRE", "JME", "REX", "RNX"]),
+        ("Real-time OS", vec!["MTK", "TDX", "MRE", "JME", "REX", "RNX", "KOL", "MOS", "NTX"]),
         (
             "Other Mobile",
-            vec!["WOS", "POS", "SBA", "TIZ", "SMG", "MAE", "LUN", "GEO"],
+            vec!["WOS", "POS", "SBA", "TIZ", "SMG", "MAE", "LUN", "GEO", "CON"],
         ),
         ("Symbian", vec!["SYM", "SYS", "SY3", "S60", "S40"]),
         (
             "Unix",
             vec![
                 "SOS", "AIX", "HPX", "BSD", "NBS", "OBS", "DFB", "SYL", "IRI", "T64", "INF", "ELE",
-                "GNX", "ULT", "NWS", "NXT", "SBL",
+                "GNX", "ULT", "NWS", "NXT", "SBL", "GHO", "PLN", "MNX", "BS1",
             ],
         ),
         ("WebTV", vec!["WTV"]),
         ("Windows", vec!["WIN"]),
         ("Windows Mobile", vec!["WPH", "WMO", "WCE", "WRT", "WIO", "KIN"]),
-        ("Other Smart TV", vec!["WHS"]),
+        ("Other Smart TV", vec!["WHS", "TIT", "ORS"]),
     ]
     .into_iter()
     .map(|(brand, families)| {

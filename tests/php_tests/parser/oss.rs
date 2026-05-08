@@ -22,8 +22,19 @@ fn test_oss() -> Result<()> {
         };
         let mut cases: Value = serde_yaml::from_reader(std::io::BufReader::new(file))?;
         let cases = cases.as_sequence_mut().expect("sequence");
+        let mut failures = 0;
         for (i, case) in cases.into_iter().enumerate() {
-            basic(i + 1, case).expect("basic test");
+            let ua = case["user_agent"].as_str().unwrap_or("").to_owned();
+            let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                basic(i + 1, case).expect("basic test");
+            }));
+            if result.is_err() {
+                failures += 1;
+                eprintln!("FAIL case {}: ua={}", i + 1, ua);
+            }
+        }
+        if failures > 0 {
+            panic!("{} test case(s) failed", failures);
         }
     }
     Ok(())
