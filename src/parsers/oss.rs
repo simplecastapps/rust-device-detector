@@ -103,16 +103,22 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
 
                 if let Some(platform_version) = &client_hints.platform_version {
                     if os.name == "Windows" {
-                        if let Some(major_version) = platform_version
-                            .split('.')
-                            .next()
-                            .and_then(|x| x.parse::<u32>().ok())
-                        {
-                            if major_version > 0 && major_version < 11 {
-                                version = Some("10".to_owned());
-                            } else if major_version > 10 {
-                                version = Some("11".to_owned());
-                            }
+                        let parts: Vec<&str> = platform_version.split('.').collect();
+                        let major_version = parts.first().and_then(|x| x.parse::<u32>().ok()).unwrap_or(0);
+                        let minor_version = parts.get(1).and_then(|x| x.parse::<u32>().ok()).unwrap_or(0);
+
+                        if major_version == 0 {
+                            // 0.x.0 maps to older Windows versions
+                            version = match minor_version {
+                                1 => Some("7".to_owned()),
+                                2 => Some("8".to_owned()),
+                                3 => Some("8.1".to_owned()),
+                                _ => version, // keep as "0.0.0" etc. for later adjustment
+                            };
+                        } else if major_version > 0 && major_version < 11 {
+                            version = Some("10".to_owned());
+                        } else if major_version > 10 {
+                            version = Some("11".to_owned());
                         }
                     }
                 }
@@ -132,7 +138,11 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
         }
     });
 
-    let os_from_ua: Option<OS> = OS_LIST.lookup(ua)?;
+    // Restore UA from client hints model name for accurate detection (e.g., Chrome OS codenames)
+    let restored_ua = restore_ua_from_client_hints(ua, client_hints);
+    let effective_ua = restored_ua.as_deref().unwrap_or(ua);
+
+    let os_from_ua: Option<OS> = OS_LIST.lookup(effective_ua)?;
 
     // various occasional overrides of client hint information based on ua.
     if let Some(ref mut os_from_hints) = &mut os_from_hints {
@@ -150,7 +160,15 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
             // detailed
             if let Some(ua_family) = &os_from_ua.family {
                 if *ua_family == os_from_hints.name {
+                    let prev_name = os_from_hints.name.clone();
                     os_from_hints.name = os_from_ua.name.clone();
+                    // When the OS name changes (e.g., Android → LeafOS), use the UA version by
+                    // default. Specialized OSes with no version regex will have ua version = None,
+                    // clearing the Android platform_version that doesn't apply to them.
+                    // If the name did NOT change (e.g., Windows), keep the hints-derived version.
+                    if os_from_hints.name != prev_name {
+                        os_from_hints.version = os_from_ua.version.clone();
+                    }
 
                     if os_from_hints.name == "HarmonyOS" {
                         os_from_hints.version = None;
@@ -170,10 +188,10 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
 
                             if let Some(version) = FIRE_OS_VERSION.get(os_hint_version) {
                                 os_from_hints.version = Some((*version).to_owned());
-                            } else {
-                                os_from_hints.version =
-                                    FIRE_OS_VERSION.get(major_version).map(|x| (*x).to_owned());
+                            } else if let Some(version) = FIRE_OS_VERSION.get(major_version) {
+                                os_from_hints.version = Some((*version).to_owned());
                             }
+                            // else: keep existing version unchanged
                         }
                     }
                 }
@@ -187,13 +205,21 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
             {
                 os_from_hints.name = os_from_ua.name.clone();
             }
+
+            // Chrome OS detected from UA codename (via restored UA) but client hints report Android
+            if os_from_hints.name == "Android" && os_from_ua.name == "Chrome OS" {
+                os_from_hints.name = os_from_ua.name.clone();
+                os_from_hints.version = None;
+                os_from_hints.family = os_from_ua.family.clone();
+                os_from_hints.desktop = os_from_ua.desktop;
+            }
         }
     }
 
-    let mut res = os_from_hints.or(os_from_ua);
+    let mut res = os_from_hints.or(os_from_ua.clone());
 
     if let Some(os) = &mut res {
-        if let platform @ Some(_) = parse_platform(ua, client_hints)? {
+        if let platform @ Some(_) = parse_platform(effective_ua, client_hints)? {
             os.platform = platform
         }
     }
@@ -262,7 +288,63 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
         }
     }
 
+    // Fix Windows version "0.0.0" — use the UA-detected version (or clear if it was "10")
+    if let Some(os) = &mut res {
+        if os.name == "Windows" && os.version.as_deref() == Some("0.0.0") {
+            if let Some(ua_version) = os_from_ua.as_ref().and_then(|u| u.version.as_deref()) {
+                os.version = if ua_version == "10" {
+                    None
+                } else {
+                    Some(ua_version.to_owned())
+                };
+            } else {
+                os.version = None;
+            }
+        }
+    }
+
     Ok(res)
+}
+
+fn restore_ua_from_client_hints(ua: &str, client_hints: Option<&ClientHint>) -> Option<String> {
+    static ANDROID_K_DETECT: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"(?i)Android (?:1[0-6][.\d]*; K(?:\s+Build/|[;)])|1[0-6]\))\s*AppleWebKit")
+            .expect("android k detect regex")
+    });
+    static ANDROID_K_REPLACE: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"(?i)Android (?:10[.\d]*; K|1[1-6])").expect("android k replace regex")
+    });
+    static DESKTOP_DETECT: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"(?:Windows (?:NT|IoT)|X11; Linux x86_64)").expect("desktop detect regex")
+    });
+    static DESKTOP_EXCLUDE: Lazy<Regex> = Lazy::new(|| {
+        Regex::new(r"CE-HTML| Mozilla/|Andr[o0]id|Tablet|Mobile|iPhone|Windows Phone|ricoh|OculusBrowser|PicoBrowser|Lenovo|compatible; MSIE|Trident/|Tesla/|XBOX|FBMD/|ARM; ?[^)]+")
+            .expect("desktop exclude regex")
+    });
+    static X11_REPLACE: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"X11; Linux x86_64").expect("x11 replace regex"));
+
+    let hints = client_hints?;
+    let model = hints.model.as_ref().filter(|m| !m.is_empty())?;
+
+    if ANDROID_K_DETECT.is_match(ua).unwrap_or(false)
+        && !ua.to_lowercase().contains("telegram-android/")
+    {
+        let os_version = hints.platform_version.as_deref().unwrap_or("10");
+        let replacement = format!("Android {}; {}", os_version, model);
+        let result = ANDROID_K_REPLACE.replace_all(ua, replacement.as_str());
+        return Some(result.into_owned());
+    }
+
+    if DESKTOP_DETECT.is_match(ua).unwrap_or(false)
+        && !DESKTOP_EXCLUDE.is_match(ua).unwrap_or(false)
+    {
+        let replacement = format!("X11; Linux x86_64; {}", model);
+        let result = X11_REPLACE.replace_all(ua, replacement.as_str());
+        return Some(result.into_owned());
+    }
+
+    None
 }
 
 fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<String>> {
@@ -315,9 +397,7 @@ fn parse_platform(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<
     static SH4_REG: Lazy<Regex> = static_user_agent_match!("sh4");
     static SPARC64_REG: Lazy<Regex> = static_user_agent_match!("sparc64");
     static X64_REG: Lazy<Regex> = Lazy::new(|| {
-        // Don't match device model names like "Elephone_P3000S-64bit"
-        // The negative lookbehind ensures we don't match if preceded by a letter or underscore
-        Regex::new(r"(?i)(?<![\w_-])(?:64-?bit|WOW64|(?:Intel)?x64|WINDOWS_64|win64|x86_?64)\b|.*amd64").expect("x64 regex")
+        Regex::new(r"(?i)(?<![\w_-])(?:64-?bit|WOW64|(?:Intel)?x64|WINDOWS_64|win64|IRIX;?64)\b|.*(?:amd64|x86_?64)").expect("x64 regex")
     });
     static X86_REG: Lazy<Regex> = static_user_agent_match!(".*32bit|.*win32|(?:i[0-9]|x)86|i86pc");
 
