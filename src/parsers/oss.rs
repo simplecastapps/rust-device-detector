@@ -161,27 +161,26 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
             if let Some(ua_family) = &os_from_ua.family {
                 if *ua_family == os_from_hints.name {
                     let prev_name = os_from_hints.name.clone();
+                    // Save the original hints version before any name-change override,
+                    // so Fire OS mapping can use the hints-derived Android version.
+                    let orig_hints_version = os_from_hints.version.clone();
                     os_from_hints.name = os_from_ua.name.clone();
-                    // When the OS name changes (e.g., Android → LeafOS), use the UA version by
-                    // default. Specialized OSes with no version regex will have ua version = None,
-                    // clearing the Android platform_version that doesn't apply to them.
-                    // If the name did NOT change (e.g., Windows), keep the hints-derived version.
+                    // When OS name changes, apply per-OS version rules matching PHP behavior.
+                    // Default: keep the client hints version (e.g., GNU/Linux → Fedora keeps 5.16.11).
                     if os_from_hints.name != prev_name {
-                        os_from_hints.version = os_from_ua.version.clone();
-                    }
-
-                    if os_from_hints.name == "HarmonyOS" {
-                        os_from_hints.version = None;
-                    }
-
-                    if os_from_hints.name == "PICO OS" {
-                        os_from_hints.version = os_from_ua.version.clone();
+                        if os_from_hints.name == "LeafOS" || os_from_hints.name == "HarmonyOS" {
+                            os_from_hints.version = None;
+                        } else if os_from_hints.name == "PICO OS" {
+                            os_from_hints.version = os_from_ua.version.clone();
+                        }
+                        // Fire OS handled below; all others keep the hints-derived version.
                     }
 
                     if os_from_hints.name == "Fire OS" {
-                        if let Some(os_hint_version) = os_from_hints.version.as_deref() {
-                            let major_version = os_from_hints
-                                .version
+                        // Use the original hints version (Android platform version) for
+                        // Fire OS mapping, not the UA-derived version set above.
+                        if let Some(os_hint_version) = orig_hints_version.as_deref() {
+                            let major_version = orig_hints_version
                                 .as_ref()
                                 .and_then(|x| x.split('.').next())
                                 .unwrap_or("0");
@@ -210,6 +209,13 @@ pub fn lookup(ua: &str, client_hints: Option<&ClientHint>) -> Result<Option<OS>>
             if os_from_hints.name == "Android" && os_from_ua.name == "Chrome OS" {
                 os_from_hints.name = os_from_ua.name.clone();
                 os_from_hints.version = None;
+                os_from_hints.family = os_from_ua.family.clone();
+                os_from_hints.desktop = os_from_ua.desktop;
+            }
+
+            // Meta Horizon is reported as Linux in client hints
+            if os_from_hints.name == "GNU/Linux" && os_from_ua.name == "Meta Horizon" {
+                os_from_hints.name = os_from_ua.name.clone();
                 os_from_hints.family = os_from_ua.family.clone();
                 os_from_hints.desktop = os_from_ua.desktop;
             }

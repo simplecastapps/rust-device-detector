@@ -5,7 +5,7 @@ use serde::Deserialize;
 use once_cell::sync::Lazy;
 use serde::Serialize;
 
-use crate::parsers::utils::{lazy_user_agent_match, LazyRegex};
+use crate::parsers::utils::{expand, lazy_user_agent_match, LazyRegex};
 
 static BOT_LIST: Lazy<BotList> = Lazy::new(|| {
     let contents = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/regexes/bots.yml"));
@@ -109,8 +109,15 @@ impl BotList {
 
     fn lookup(&self, ua: &str) -> Result<Option<Bot>> {
         for bot in self.bots.iter() {
-            if bot.regex.is_match(ua)? {
-                return Ok(Some(bot.into()));
+            if let Some(captures) = bot.regex.captures(ua)? {
+                let mut bot_out: Bot = bot.into();
+                // Expand capture group references (e.g. $1) in name
+                if bot_out.name.contains('$') {
+                    let mut expanded = String::new();
+                    expand(&bot_out.name, &mut expanded, &captures);
+                    bot_out.name = expanded;
+                }
+                return Ok(Some(bot_out));
             }
         }
 

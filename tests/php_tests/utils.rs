@@ -65,13 +65,16 @@ pub fn client_hint_mock(fields: &Mapping) -> Result<ClientHint> {
     for (key, value) in fields {
         let key = key.as_str().expect("header name or mock field name");
         if !MOCK_HEADERS.iter().any(|x| *x == key) {
-            normal_fields.push((
-                // In php their client hints allows headers to be prefixed with HTTP_ or HTTP-.
-                // as that is a base behavior of php header detection. But we don't need to do
-                // that outside of tests.
-                key.trim_start_matches("http-").to_owned(),
-                value.as_str().expect("header value").to_owned(),
-            ));
+            // Skip null header values (e.g., Sec-CH-UA-Model: null means model is not set)
+            if let Some(v) = value.as_str() {
+                normal_fields.push((
+                    // In php their client hints allows headers to be prefixed with HTTP_ or HTTP-.
+                    // as that is a base behavior of php header detection. But we don't need to do
+                    // that outside of tests.
+                    key.trim_start_matches("http-").to_owned(),
+                    v.to_owned(),
+                ));
+            }
         }
     }
 

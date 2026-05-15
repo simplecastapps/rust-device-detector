@@ -109,7 +109,7 @@ impl LimitedUserMatchRegex {
         .unwrap_or_else(|| {
             let mut reg = "(?i:".to_owned();
             reg.push_str(key);
-            reg.push_str(r#"\s*/?\s*((?=\d+\.\d)\d+[.\d]*|\d{1,7}(?=(?:\D|$)))"#);
+            reg.push_str(r#"\s*[/_]?\s*((?=\d+\.\d)\d+[.\d]*|\d{1,7}(?=(?:\D|$)))"#);
             reg.push(')');
 
             // println!("LimitedUserMatchRegex compilation: {}", reg);

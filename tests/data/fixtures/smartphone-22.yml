@@ -1183,8 +1183,8 @@
     engine_version: ""
   device:
     type: smartphone
-    brand: Hisense
-    model: Smartfren Andromax U2
+    brand: Smartfren
+    model: Andromax U2
   os_family: Android
   browser_family: Opera
 -
@@ -4264,15 +4264,17 @@
     version: "11"
     platform: ""
   client:
-    type: mobile app
+    type: browser
     name: HeyTapBrowser
     version: 40.7.17.9
+    engine: Blink
+    engine_version: 70.0.3538.80
   device:
     type: smartphone
     brand: Realme
     model: GT Neo
   os_family: Android
-  browser_family: Unknown
+  browser_family: Chrome
 -
   user_agent: Mozilla/5.0 (Linux; U; Android 11; zh-cn; M2012K11C Build/RKQ1.201112.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/79.0.3945.147 Mobile Safari/537.36 XiaoMi/MiuiBrowser/14.2.22
   os:
@@ -5961,7 +5963,7 @@
     engine_version: 89.0.4389.90
   device:
     type: smartphone
-    brand: Twoe
+    brand: 2E
     model: E500A
   os_family: Android
   browser_family: Chrome
