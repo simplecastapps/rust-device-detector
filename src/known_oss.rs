@@ -190,7 +190,7 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("QTP", "Qtopia"),
         ("PIO", "Raspberry Pi OS"),
         ("RAS", "Raspbian"),
-        ("RNX", "RTOS & Next"),
+        ("RXT", "RTOS & Next"),
         ("RHT", "Red Hat"),
         ("RST", "Red Star"),
         ("RED", "RedOS"),
@@ -206,7 +206,7 @@ fn available_operating_systems() -> HashMap<String, String> {
         ("RZD", "RazoDroiD"),
         ("SAB", "Sabayon"),
         ("SSE", "SUSE"),
-        ("OPS", "openSUSE"),
+        ("OSS", "openSUSE"),
         ("SAF", "Sailfish OS"),
         ("SCI", "Scientific Linux"),
         ("SEE", "SeewoOS"),
@@ -308,13 +308,13 @@ fn os_families() -> HashMap<String, Vec<String>> {
                 "TEN", "CST", "NOV", "ROU", "ZOR", "RED", "KAL", "ORA", "VID", "TIV", "BSN", "RAS",
                 "UOS", "PIO", "FRI", "LIR", "WEB", "SER", "ASP", "AOS", "LOO", "EUL", "SCI", "ALP",
                 "CLO", "ROC", "OVZ", "PVE", "RST", "EZX", "GNS", "JOL", "TUR", "QTP", "WPO", "PAN", "VIZ", "AZU",
-                "COL", "ELM", "LPU", "OPS",
+                "COL", "ELM", "LPU", "OSS",
             ],
         ),
         ("Mac", vec!["MAC"]),
         ("Mobile Gaming Console", vec!["PSP", "NDS", "XBX"]),
         ("OpenVMS", vec!["OVS"]),
-        ("Real-time OS", vec!["MTK", "TDX", "MRE", "JME", "REX", "RNX", "KOL", "MOS", "NTX"]),
+        ("Real-time OS", vec!["MTK", "TDX", "MRE", "JME", "REX", "RXT", "KOL", "MOS", "NTX"]),
         (
             "Other Mobile",
             vec!["WOS", "POS", "SBA", "TIZ", "SMG", "MAE", "LUN", "GEO", "CON"],
@@ -355,7 +355,7 @@ pub fn desktop_oss() -> HashSet<String> {
         "Windows",
         "BeOS",
         "Chrome OS",
-        "Chromium OS",
+        "OpenVMS",
     ]
     .into_iter()
     .map(|f| f.to_owned())

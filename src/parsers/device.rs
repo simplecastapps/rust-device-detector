@@ -205,18 +205,38 @@ pub fn lookup(
 ) -> Result<Option<Device>> {
     static ANDROID_10_MODEL: Lazy<Regex> =
         Lazy::new(|| Regex::new(r"(Android 10[.\d]*; K)(?: Build/|[;)])").unwrap());
+    // Matches reduced UAs for Android 11-15: "Android 11)" / "Android 12)" etc.
+    static ANDROID_REDUCED_UA: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"(Android 1[1-5])\) AppleWebKit").unwrap());
+    // Matches desktop fragment used in client hints reduced UAs
+    static DESKTOP_UA_FRAGMENT: Lazy<Regex> =
+        Lazy::new(|| Regex::new(r"(X11; Linux x86_64)").unwrap());
 
-    // this sets the model into the device string so that further
-    // user agent level device detection will find it.
+    // Restore the user agent from client hints model (mirrors PHP's restoreUserAgentFromClientHints).
+    // This injects the model into the UA string so that device detection finds it.
     let ua: Cow<'_, str> = 'ua: {
         if let Some(client_hints) = &client_hints {
             if let Some(model) = &client_hints.model {
+                // Android 10; K  →  Android {osVersion}; {model}
                 if let Some(captures) = ANDROID_10_MODEL.captures(ua)? {
                     let os_version: &str =
                         os_info.and_then(|os| os.version.as_deref()).unwrap_or("10");
                     let replacement = format!("Android {}; {}", os_version, model);
                     let res = ua.replace(&captures[1], &replacement);
-
+                    break 'ua Cow::Owned(res);
+                }
+                // Android 11..15)  →  Android {osVersion}; {model})
+                if let Some(captures) = ANDROID_REDUCED_UA.captures(ua)? {
+                    let os_version: &str =
+                        os_info.and_then(|os| os.version.as_deref()).unwrap_or("10");
+                    let replacement = format!("Android {}; {}", os_version, model);
+                    let res = ua.replace(captures.get(1).unwrap().as_str(), &replacement);
+                    break 'ua Cow::Owned(res);
+                }
+                // X11; Linux x86_64  →  X11; Linux x86_64; {model}
+                if let Some(captures) = DESKTOP_UA_FRAGMENT.captures(ua)? {
+                    let replacement = format!("X11; Linux x86_64; {}", model);
+                    let res = ua.replace(captures.get(1).unwrap().as_str(), &replacement);
                     break 'ua Cow::Owned(res);
                 }
             }
@@ -284,8 +304,9 @@ pub fn lookup(
                         if device.brand.is_none() {
                             device.brand = mobile_device.brand;
                         }
-                        // Update the model to the properly formatted name from the device database
-                        device.model = mobile_device.model;
+                        if let Some(resolved_model) = mobile_device.model {
+                            device.model = Some(resolved_model);
+                        }
                     }
                 }
             }
@@ -419,6 +440,16 @@ pub fn lookup(
         }
     }
 
+    // All devices running Coolita OS are assumed to be a tv
+    if let Some(os) = &os_info {
+        if os.name == "Coolita OS" {
+            device.device_type = Some(DeviceType::Television);
+            if device.brand.is_none() {
+                device.brand = Some("coocaa".to_owned());
+            }
+        }
+    }
+
     // Puffin browser device type detection patterns
     static PUFFIN_DESKTOP: Lazy<Regex> = static_user_agent_match!(r#"Puffin/(?:\d+[.\d]+)[LMW]D"#);
     static PUFFIN_SMARTPHONE: Lazy<Regex> = static_user_agent_match!(r#"Puffin/(?:\d+[.\d]+)[AIFLW]P"#);
@@ -437,7 +468,7 @@ pub fn lookup(
 
     static OPERA: Lazy<Regex> = static_user_agent_match!(r#"Opera TV Store| OMI/"#);
     static ANDR0ID: Lazy<Regex> =
-        static_user_agent_match!(r#"Andr0id|(?:Android(?: UHD)?|Google) TV|\(lite\) TV|BRAVIA'"#);
+        static_user_agent_match!(r#"Andr0id|(?:Android(?: UHD)?|Google) TV|\(lite\) TV|BRAVIA|Firebolt|TV$"#);
     static TIZEN: Lazy<Regex> = static_user_agent_match!(r#"SmartTV|Tizen.+ TV .+$"#);
     static GENERIC_TV: Lazy<Regex> = static_user_agent_match!(r#"\(TV;"#);
 
@@ -475,6 +506,7 @@ pub fn lookup(
                 "Quick Search TV",
                 "QJY TV Browser",
                 "TV Bro",
+                "Redline",
             ]
             .iter()
             .any(|x| *x == client.name)

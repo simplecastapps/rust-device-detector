@@ -14,8 +14,9 @@ static DEVICE_LIST: Lazy<DeviceList> = Lazy::new(|| {
     ));
     DeviceList::from_file(contents).expect("loading televisions.yml")
 });
-static HBTV: Lazy<Regex> = static_user_agent_match!(r#"HbbTV/([1-9]{1}(?:\.[0-9]{1}){1,2})"#);
-static CE_HTML: Lazy<Regex> = static_user_agent_match!(r#"CE-HTML"#);
+// Matches PHP HbbTv.php isHbbTv(): checks for HbbTV/ OR SmartTvA/ (case-insensitive via SafeRegex)
+static HBTV: Lazy<Regex> =
+    static_user_agent_match!(r#"(?:HbbTV|SmartTvA)/([1-9]{1}(?:\.[0-9]{1}){1,2})"#);
 
 pub fn is_hbbtv(ua: &str) -> Result<bool> {
     let res = HBTV.is_match(ua)?;
@@ -23,8 +24,9 @@ pub fn is_hbbtv(ua: &str) -> Result<bool> {
 }
 
 pub fn lookup(ua: &str) -> Result<Option<Device>> {
-    // Check for HbbTV or CE-HTML (both indicate TV-like devices)
-    if !is_hbbtv(ua)? && !CE_HTML.is_match(ua)? {
+    // Only parse UAs containing HbbTV or SmartTvA fragments (matches PHP HbbTv.php behavior)
+    // CE-HTML alone does NOT trigger this parser — those UAs fall through to mobiles.yml
+    if !is_hbbtv(ua)? {
         return Ok(None);
     }
 
@@ -36,13 +38,13 @@ pub fn lookup(ua: &str) -> Result<Option<Device>> {
         res
     });
 
-    // always set device type to tv for hbtvs
-    let res = res.or_else(|| {
-        Some(Device {
+    // For HbbTV/SmartTvA, always return a TV device even if no brand was found in the list.
+    if res.is_none() {
+        return Ok(Some(Device {
             device_type: Some(DeviceType::Television),
             ..Default::default()
-        })
-    });
+        }));
+    }
 
     Ok(res)
 }
